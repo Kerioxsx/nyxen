@@ -1,7 +1,7 @@
 {
  "version": "1.1.0",
  "url": "https://github.com/Kerioxsx/nyxen/releases/download/v1.1.0/NyxenSetup.exe",
- "sha256": "7a62d12e2dc94479f11cf6a6f0a44bbf0ad98606e74922781bdb3ef161da133f",
- "size": 30997104,
+ "sha256": "645562f1ed53b3d08c91476b24774bbc61a193d3356102496f2b59d1667abbc3",
+ "size": 31000855,
  "notes": "Achievements without a Steam API key. Nyxen now reads your achievements from\nyour own Steam profile page, so there is no key to create and nothing to\npaste - it offers the accounts Steam has already signed in on your PC and you\npick one. A key stays optional and buys only two things: games you own but\nhave not installed, and reading a profile that is not public.\n\nUpdates inside the app. It checks for a new version, tells you what changed,\nand installs it with one button. The download is checked against its\npublished SHA-256 before anything is run.\n\nLetting a friend in is one button. Nyxen opens the tunnel itself - no terminal\nwindow, no port forwarding, no router settings - and the invite link now\ncarries the address, so the person you send it to does not have to type\nanything either."
 }
