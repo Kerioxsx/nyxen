@@ -5,180 +5,309 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nyxen — one place for your games</title>
 <meta name="description" content="A Windows companion for your games: mods from four sites at once, Minecraft with any launcher, RetroArch achievements, friends and calls. Free, one click, no account needed.">
-<meta name="theme-color" content="#0b0b0b">
+<meta name="theme-color" content="#060606">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <meta property="og:title" content="Nyxen">
 <meta property="og:description" content="Mods, Minecraft, retro achievements and friends, in one Windows app.">
 <meta property="og:image" content="logo.svg">
 <meta property="og:type" content="website">
 <style>
-  /* The app's own Eclipse palettes, so the site can be recoloured with the
-     same themes the app ships. Default is the plain dark one. */
+  /* ------------------------------------------------------------------
+     One colour, and it is not a colour.
+
+     The previous version of this page carried five palettes - purple,
+     green, orange, pink - and a swatch row to switch between them. It
+     was loud, and the hue fought the screenshots, which are the only
+     thing here that should be doing the talking. So the whole page is
+     now a single greyscale ramp: black through white, nothing else.
+     Emphasis comes from contrast, weight and movement instead of hue.
+
+     The one remaining choice is dark or light, which is still
+     monochrome either way - so the theme button stayed a button, it
+     just stopped adding colours.
+     ------------------------------------------------------------------ */
   :root{
-    --bg1:#141414; --bg2:#070707; --fg:#f4f4f4; --dim:#9a9a9a; --dimmer:#6a6a6a;
-    --line:rgba(255,255,255,.10); --panel:rgba(255,255,255,.035);
-    --panel2:rgba(255,255,255,.06);
-    --accent:#f4f4f4; --accent2:#666; --accent-fg:#0a0a0a;
-    --glow:rgba(255,255,255,.40);
+    --bg:#060606; --bg2:#0d0d0d; --raise:#141414;
+    --fg:#f2f2f2; --dim:#9c9c9c; --dimmer:#8a8a8a;
+    --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.20);
+    --panel:rgba(255,255,255,.035); --panel2:rgba(255,255,255,.07);
+    --ink:#f2f2f2;              /* the "accent": plain white */
+    --ink-fg:#070707;
+    --glow:rgba(255,255,255,.34);
+    --dot:255,255,255;
     --r:16px; --ease:cubic-bezier(.2,.8,.2,1);
+    --rail:0;                   /* scroll progress, 0..1 */
+    --px:0; --py:0;             /* pointer, -1..1, for parallax */
   }
-  body[data-theme="nebula"]{--bg1:#161033;--bg2:#04020c;--accent:#9d8cff;--accent2:#4b3a9e;
-    --accent-fg:#0a0618;--glow:rgba(157,140,255,.45);--line:rgba(170,155,255,.16);
-    --panel:rgba(170,155,255,.05);--panel2:rgba(170,155,255,.09)}
-  body[data-theme="aurora"]{--bg1:#07231f;--bg2:#01090a;--accent:#6ef2c0;--accent2:#2b7fa8;
-    --accent-fg:#02140f;--glow:rgba(110,242,192,.42);--line:rgba(130,245,205,.16);
-    --panel:rgba(130,245,205,.05);--panel2:rgba(130,245,205,.09)}
-  body[data-theme="ember"]{--bg1:#2a1410;--bg2:#0b0402;--accent:#ff9a4d;--accent2:#a8451f;
-    --accent-fg:#1a0a04;--glow:rgba(255,154,77,.45);--line:rgba(255,180,130,.16);
-    --panel:rgba(255,180,130,.05);--panel2:rgba(255,180,130,.09)}
-  body[data-theme="bloom"]{--bg1:#2a0f22;--bg2:#0b0208;--accent:#ff5fa2;--accent2:#a82b6b;
-    --accent-fg:#1a0410;--glow:rgba(255,95,162,.45);--line:rgba(255,140,190,.16);
-    --panel:rgba(255,140,190,.05);--panel2:rgba(255,140,190,.09)}
+  body.light{
+    --bg:#ececec; --bg2:#e3e3e3; --raise:#f7f7f7;
+    --fg:#0c0c0c; --dim:#565656; --dimmer:#5f5f5f;
+    --line:rgba(0,0,0,.12); --line2:rgba(0,0,0,.26);
+    --panel:rgba(0,0,0,.030); --panel2:rgba(0,0,0,.06);
+    --ink:#0c0c0c; --ink-fg:#f7f7f7;
+    --glow:rgba(0,0,0,.22);
+    --dot:0,0,0;
+  }
 
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{margin:0;color:var(--fg);background:var(--bg2);
+  body{margin:0;color:var(--fg);background:var(--bg);
     font:16px/1.6 system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     -webkit-font-smoothing:antialiased;overflow-x:hidden;
-    transition:background .6s var(--ease), color .6s var(--ease)}
+    transition:background .5s var(--ease),color .5s var(--ease)}
   a{color:inherit}
   .wrap{max-width:1060px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
+  ::selection{background:var(--ink);color:var(--ink-fg)}
 
-  /* ---- the moving backdrop ------------------------------------------
-     A canvas, the same idea as the app's Eclipse scenes: drifting points
-     with a few brighter ones, recoloured by the active theme. Capped at
-     30fps, stopped when the tab is hidden, and never started at all if the
-     visitor asked for reduced motion. */
-  #sky{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.75}
+  /* ---- the backdrop: three layers that all move ---------------------
+     1. a canvas of drifting points, linked by lines when they are near
+     2. a faint grid that slides, tied to the pointer
+     3. a vignette that keeps text readable over both                  */
+  #sky{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.8}
+  .mesh{position:fixed;inset:-2px;z-index:0;pointer-events:none;opacity:.5;
+    background-image:
+      linear-gradient(to right,rgba(var(--dot),.055) 1px,transparent 1px),
+      linear-gradient(to bottom,rgba(var(--dot),.055) 1px,transparent 1px);
+    background-size:62px 62px;
+    transform:translate3d(calc(var(--px) * -14px),calc(var(--py) * -14px),0);
+    transition:transform .5s var(--ease);
+    mask-image:radial-gradient(78% 62% at 50% 12%,#000 25%,transparent 78%);
+    -webkit-mask-image:radial-gradient(78% 62% at 50% 12%,#000 25%,transparent 78%)}
   .veil{position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(90% 60% at 50% -10%,
-        color-mix(in srgb,var(--accent) 10%,transparent),transparent 60%),
-      linear-gradient(180deg,transparent,var(--bg2) 88%)}
+    background:
+      radial-gradient(88% 58% at 50% -12%,rgba(var(--dot),.10),transparent 62%),
+      linear-gradient(180deg,transparent 40%,var(--bg) 94%)}
+
+  /* the beam that follows your cursor - white on black, no hue */
+  .beam{position:fixed;top:0;left:0;width:520px;height:520px;z-index:0;
+    margin:-260px 0 0 -260px;pointer-events:none;opacity:0;
+    background:radial-gradient(circle,rgba(var(--dot),.075),transparent 62%);
+    transition:opacity .5s}
+  body.hasbeam .beam{opacity:1}
+
+  /* ---- scroll progress ---------------------------------------------- */
+  .rail{position:fixed;top:0;left:0;right:0;height:2px;z-index:40;
+    background:transparent}
+  .rail i{display:block;height:100%;background:var(--ink);
+    transform:scaleX(var(--rail));transform-origin:0 50%;
+    box-shadow:0 0 14px -2px var(--glow)}
 
   /* ---- header -------------------------------------------------------- */
-  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);
-    border-bottom:1px solid transparent;transition:border-color .3s,background .3s}
-  header.stuck{border-color:var(--line);
-    background:color-mix(in srgb,var(--bg2) 78%,transparent)}
+  header{position:sticky;top:0;z-index:30;
+    border-bottom:1px solid transparent;
+    transition:border-color .3s,background .3s,backdrop-filter .3s}
+  header.stuck{border-color:var(--line);backdrop-filter:blur(12px);
+    background:color-mix(in srgb,var(--bg) 76%,transparent)}
   .hrow{display:flex;align-items:center;gap:12px;padding:14px 0}
-  .mark{width:38px;height:38px;flex:none;border-radius:11px;background:#0a0a0a;
-    display:grid;place-items:center;overflow:hidden;
-    box-shadow:0 0 0 1px var(--line), 0 0 22px -6px var(--glow);
-    transition:transform .5s var(--ease), box-shadow .4s}
+  .mark{width:38px;height:38px;flex:none;border-radius:11px;
+    background:var(--raise);display:grid;place-items:center;overflow:hidden;
+    box-shadow:0 0 0 1px var(--line), 0 0 22px -8px var(--glow);
+    transition:transform .5s var(--ease),box-shadow .4s}
   .mark img{width:100%;height:100%;display:block}
   a.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-  a.brand:hover .mark{transform:rotate(-8deg) scale(1.06);
-    box-shadow:0 0 0 1px var(--accent), 0 0 30px -4px var(--glow)}
+  a.brand:hover .mark{transform:rotate(-9deg) scale(1.07);
+    box-shadow:0 0 0 1px var(--line2), 0 0 30px -6px var(--glow)}
   .bname{font-weight:800;letter-spacing:-.02em;font-size:18px}
   header nav{margin-left:auto;display:flex;gap:18px;font-size:14px;color:var(--dim)}
-  header nav a{text-decoration:none;position:relative;padding:3px 0}
+  header nav a{text-decoration:none;position:relative;padding:3px 0;
+    transition:color .2s}
   header nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;
-    height:1px;background:var(--accent);transition:right .25s var(--ease)}
+    height:1px;background:var(--ink);transition:right .28s var(--ease)}
   header nav a:hover{color:var(--fg)}
-  header nav a:hover::after{right:0}
-  @media(max-width:680px){header nav{display:none}}
+  header nav a:hover::after,header nav a[aria-current="true"]::after{right:0}
+  header nav a[aria-current="true"]{color:var(--fg)}
+  .lamp{margin-left:16px;width:34px;height:34px;flex:none;cursor:pointer;
+    border-radius:50%;border:1px solid var(--line);background:var(--panel);
+    color:var(--fg);display:grid;place-items:center;padding:0;
+    transition:transform .3s var(--ease),border-color .2s,background .3s}
+  .lamp:hover{transform:rotate(28deg) scale(1.08);border-color:var(--line2)}
+  .lamp svg{width:16px;height:16px;display:block}
+  /* On a phone the links go and the light switch stays - it is the one
+     control, and the sections are a swipe away anyway. */
+  @media(max-width:760px){header nav a{display:none}}
 
   /* ---- hero ---------------------------------------------------------- */
-  .hero{text-align:center;padding:74px 0 34px}
-  .bigmark{width:112px;height:112px;margin:0 auto 26px;border-radius:26px;
-    background:#0a0a0a;display:grid;place-items:center;overflow:hidden;
-    box-shadow:0 0 0 1px var(--line), 0 22px 60px -20px var(--glow);
-    animation:markIn 1s var(--ease) both, float 8s ease-in-out 1s infinite}
-  .bigmark img{width:100%;height:100%;display:block}
-  @keyframes markIn{from{opacity:0;transform:translateY(18px) scale(.9) rotate(-10deg)}
+  .hero{text-align:center;padding:76px 0 30px;position:relative}
+  .bigmark{width:112px;height:112px;margin:0 auto 26px;border-radius:27px;
+    background:var(--raise);display:grid;place-items:center;overflow:hidden;
+    position:relative;
+    box-shadow:0 0 0 1px var(--line), 0 24px 64px -24px var(--glow);
+    animation:markIn 1s var(--ease) both, float 9s ease-in-out 1.1s infinite}
+  .bigmark img{width:100%;height:100%;display:block;position:relative;z-index:1}
+  /* two rings that breathe outwards, like the app's pulse on a live card */
+  .bigmark::before,.bigmark::after{content:"";position:absolute;inset:0;
+    border-radius:inherit;border:1px solid var(--line2);
+    animation:ripple 4.2s var(--ease) infinite}
+  .bigmark::after{animation-delay:2.1s}
+  @keyframes ripple{0%{transform:scale(1);opacity:.65}
+    100%{transform:scale(1.55);opacity:0}}
+  @keyframes markIn{from{opacity:0;transform:translateY(20px) scale(.88) rotate(-12deg)}
     to{opacity:1;transform:none}}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 
-  h1{font-size:clamp(36px,7vw,68px);line-height:1.02;letter-spacing:-.04em;
+  h1{font-size:clamp(36px,7vw,70px);line-height:1.02;letter-spacing:-.04em;
     margin:0 0 18px;font-weight:800}
-  h1 .shine{background:linear-gradient(100deg,var(--fg) 20%,var(--accent) 45%,var(--fg) 70%);
-    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
-    color:transparent;animation:shine 7s linear infinite}
-  @keyframes shine{to{background-position:-220% 0}}
-  .sub{font-size:clamp(16px,2.1vw,20px);color:var(--dim);max-width:660px;
-    margin:0 auto 30px}
+  /* words arrive one at a time, each from under a mask */
+  .word{display:inline-block;overflow:hidden;vertical-align:top;
+    padding:0 .03em;margin:0 -.03em}
+  .word i{display:inline-block;font-style:normal;
+    transform:translateY(110%) rotate(4deg);opacity:0;
+    animation:wordUp .8s var(--ease) forwards;
+    animation-delay:calc(var(--i) * 70ms + 160ms)}
+  @keyframes wordUp{to{transform:none;opacity:1}}
+  /* The sheen is clipped to the text - but it has to be clipped to the
+     element that CONTAINS the text. Putting it on the h1 span while the
+     words live in child <i> elements made the whole headline invisible:
+     color:transparent inherited down, and background-clip on an ancestor
+     does not clip a descendant's glyphs. So each word clips its own, with
+     a stagger so the light still travels along the line.
+     Guarded by @supports, because without background-clip:text the
+     transparent colour would be an invisible headline again. */
+  .shine{color:var(--fg)}
+  @supports ((-webkit-background-clip:text) or (background-clip:text)){
+    .shine .word i{background:linear-gradient(100deg,
+        var(--fg) 18%,rgba(var(--dot),.45) 44%,var(--fg) 70%);
+      background-size:240% 100%;
+      -webkit-background-clip:text;background-clip:text;
+      color:transparent;
+      animation:wordUp .8s var(--ease) forwards,
+                shine 8s linear infinite;
+      animation-delay:calc(var(--i) * 70ms + 160ms),
+                      calc(var(--i) * -260ms)}
+  }
+  @keyframes shine{to{background-position:-240% 0}}
+  .sub{font-size:clamp(16px,2.1vw,20px);color:var(--dim);max-width:640px;
+    margin:0 auto 30px;animation:fadeUp .9s var(--ease) .5s both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
-  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+    align-items:center;animation:fadeUp .9s var(--ease) .66s both}
   .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;
     border-radius:999px;text-decoration:none;font-weight:700;font-size:16px;
-    background:var(--accent);color:var(--accent-fg);border:1px solid var(--accent);
-    position:relative;overflow:hidden;
-    transition:transform .18s var(--ease),box-shadow .18s var(--ease)}
-  .btn:hover{transform:translateY(-2px);box-shadow:0 16px 38px -12px var(--glow)}
-  .btn::after{content:"";position:absolute;inset:0;
-    background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);
-    transform:translateX(-120%);animation:sweep 4.5s ease-in-out 1.5s infinite}
+    background:var(--ink);color:var(--ink-fg);border:1px solid var(--ink);
+    position:relative;overflow:hidden;isolation:isolate;
+    transform:translate3d(var(--mx,0),var(--my,0),0);
+    transition:transform .22s var(--ease),box-shadow .22s var(--ease)}
+  .btn:hover{box-shadow:0 18px 40px -14px var(--glow)}
+  .btn span{position:relative;z-index:2}
+  /* a light sweeps across it on a loop, and again on hover */
+  .btn::after{content:"";position:absolute;inset:0;z-index:1;
+    background:linear-gradient(100deg,transparent 34%,
+      rgba(var(--dot),.0) 34%,rgba(255,255,255,.30) 50%,transparent 66%);
+    transform:translateX(-120%);animation:sweep 5s ease-in-out 1.6s infinite}
   @keyframes sweep{0%{transform:translateX(-120%)}45%,100%{transform:translateX(120%)}}
+  .btn .arw{transition:transform .22s var(--ease)}
+  .btn:hover .arw{transform:translateX(4px)}
   .btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
   .btn.ghost::after{display:none}
-  .btn.ghost:hover{border-color:var(--fg)}
-  .meta{color:var(--dimmer);font-size:13px;margin-top:16px}
+  .btn.ghost:hover{border-color:var(--fg);background:var(--panel)}
+  .meta{color:var(--dimmer);font-size:13px;margin-top:16px;
+    animation:fadeUp .9s var(--ease) .8s both}
+
+  /* ---- the marquee of what it talks to ------------------------------- */
+  .belt{position:relative;margin:26px 0 6px;padding:14px 0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    overflow:hidden;
+    mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .beltrun{display:flex;width:max-content;gap:34px;
+    animation:belt 34s linear infinite}
+  .belt:hover .beltrun{animation-play-state:paused}
+  @keyframes belt{to{transform:translateX(-50%)}}
+  .beltrun b{font-weight:600;font-size:13px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--dimmer);white-space:nowrap;
+    display:flex;align-items:center;gap:34px;transition:color .3s}
+  .beltrun b:hover{color:var(--fg)}
+  .beltrun b::after{content:"";width:4px;height:4px;border-radius:50%;
+    background:var(--dimmer)}
 
   /* ---- counters ------------------------------------------------------ */
   .stats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    padding:34px 0 10px}
+    padding:30px 0 10px}
   .stat{text-align:center;border:1px solid var(--line);border-radius:14px;
-    padding:18px 12px;background:var(--panel)}
+    padding:18px 12px;background:var(--panel);position:relative;overflow:hidden;
+    transition:transform .25s var(--ease),border-color .25s}
+  .stat:hover{transform:translateY(-3px);border-color:var(--line2)}
+  .stat::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;
+    background:var(--ink);transform:scaleX(0);transform-origin:0 50%;
+    transition:transform .5s var(--ease)}
+  .stat:hover::after{transform:scaleX(1)}
   .stat .n{font-size:clamp(22px,3.6vw,32px);font-weight:800;letter-spacing:-.03em;
     font-variant-numeric:tabular-nums;color:var(--fg)}
   .stat .l{font-size:12.5px;color:var(--dim);margin-top:3px}
 
   /* ---- sections ------------------------------------------------------ */
-  section{padding:44px 0}
+  section{padding:46px 0}
   h2{font-size:clamp(24px,3.6vw,34px);letter-spacing:-.03em;margin:0 0 8px}
   .lead{color:var(--dim);margin:0 0 26px;max-width:700px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--dimmer);margin:0 0 10px;display:flex;align-items:center;gap:10px}
+  .eyebrow::after{content:"";height:1px;flex:1;background:var(--line)}
 
-  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    perspective:1200px}
   .card{border:1px solid var(--line);border-radius:var(--r);padding:22px;
     background:linear-gradient(180deg,var(--panel2),transparent 70%),var(--panel);
-    position:relative;overflow:hidden;
-    transition:transform .2s var(--ease),border-color .2s,box-shadow .2s}
-  .card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 45%,transparent);
-    box-shadow:0 18px 44px -22px var(--glow)}
+    position:relative;overflow:hidden;transform-style:preserve-3d;
+    transition:transform .3s var(--ease),border-color .25s,box-shadow .3s}
+  /* the pointer carries a soft light across whichever card it is over */
+  .card::before{content:"";position:absolute;inset:0;opacity:0;
+    pointer-events:none;transition:opacity .3s;
+    background:radial-gradient(220px circle at var(--cx,50%) var(--cy,50%),
+      rgba(var(--dot),.09),transparent 70%)}
+  .card:hover::before{opacity:1}
+  .card:hover{border-color:var(--line2);box-shadow:0 22px 50px -26px var(--glow)}
   .card h3{margin:0 0 8px;font-size:17.5px;letter-spacing:-.015em}
   .card p{margin:0;color:var(--dim);font-size:14.5px}
   .card .tag{display:inline-block;margin-bottom:12px;font-size:10.5px;
-    text-transform:uppercase;letter-spacing:.12em;color:var(--accent);
-    border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
-    border-radius:999px;padding:3px 10px}
-  .card ul{margin:10px 0 0;padding-left:18px;color:var(--dim);font-size:14px}
-  .card li{margin:3px 0}
+    text-transform:uppercase;letter-spacing:.12em;color:var(--fg);
+    border:1px solid var(--line2);border-radius:999px;padding:3px 10px;
+    background:var(--panel2)}
+  .card ul{margin:10px 0 0;padding-left:0;list-style:none;color:var(--dim);
+    font-size:14px}
+  .card li{margin:5px 0;padding-left:18px;position:relative}
+  .card li::before{content:"";position:absolute;left:2px;top:.62em;
+    width:6px;height:1px;background:var(--dimmer);transition:width .25s var(--ease)}
+  .card:hover li::before{width:10px;background:var(--fg)}
 
-  /* scroll reveal */
-  .rise{opacity:0;transform:translateY(20px);
-    transition:opacity .6s var(--ease),transform .6s var(--ease)}
+  /* ---- three steps, with a line that draws itself ------------------- */
+  .steps{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    position:relative}
+  .step{border:1px solid var(--line);border-radius:var(--r);padding:22px;
+    background:var(--panel);position:relative;overflow:hidden}
+  .step .num{font-size:34px;font-weight:800;letter-spacing:-.04em;
+    color:transparent;-webkit-text-stroke:1px var(--line2);line-height:1;
+    margin-bottom:10px;transition:-webkit-text-stroke-color .3s,color .3s}
+  .step:hover .num{color:var(--fg);-webkit-text-stroke-color:transparent}
+  .step h3{margin:0 0 6px;font-size:16.5px}
+  .step p{margin:0;color:var(--dim);font-size:14.5px}
+  .step::after{content:"";position:absolute;left:0;top:0;width:1px;height:100%;
+    background:var(--ink);transform:scaleY(0);transform-origin:50% 0;
+    transition:transform .55s var(--ease)}
+  .step.in::after{transform:scaleY(1)}
+
+  /* ---- scroll reveal, with a stagger inside each group -------------- */
+  .rise{opacity:0;transform:translateY(22px);
+    transition:opacity .7s var(--ease),transform .7s var(--ease);
+    transition-delay:calc(var(--d,0) * 70ms)}
   .rise.in{opacity:1;transform:none}
 
   .rows{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
     background:var(--panel)}
-  .row{display:flex;gap:16px;padding:16px 20px;align-items:baseline}
+  .row{display:flex;gap:16px;padding:16px 20px;align-items:baseline;
+    position:relative;transition:background .25s,padding-left .25s var(--ease)}
+  .row:hover{background:var(--panel2);padding-left:26px}
   .row+.row{border-top:1px solid var(--line)}
   .row b{flex:none;width:200px;font-weight:600}
   .row span{color:var(--dim);font-size:14.5px}
   @media(max-width:620px){.row{flex-direction:column;gap:4px}.row b{width:auto}}
 
-  .note{border:1px solid var(--line);border-left:3px solid var(--accent);
+  .note{border:1px solid var(--line);border-left:3px solid var(--ink);
     border-radius:10px;padding:16px 18px;color:var(--dim);font-size:14.5px;
     background:var(--panel)}
   .note b{color:var(--fg)}
   code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;
     background:var(--panel2);padding:2px 6px;border-radius:5px;word-break:break-all}
-
-  /* ---- theme picker -------------------------------------------------- */
-  .themes{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;
-    padding:8px 0 0}
-  .sw{width:30px;height:30px;border-radius:50%;cursor:pointer;border:1px solid var(--line);
-    transition:transform .16s var(--ease),box-shadow .16s}
-  .sw:hover{transform:scale(1.14)}
-  .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--bg2),0 0 0 4px var(--accent)}
-
-  footer{border-top:1px solid var(--line);margin-top:34px;padding:26px 0 46px;
-    color:var(--dimmer);font-size:13.5px;display:flex;gap:18px;flex-wrap:wrap;
-    align-items:center}
-  footer a{text-decoration:none}
-  footer a:hover{color:var(--fg)}
-  footer .right{margin-left:auto;max-width:420px;text-align:right}
-  @media(max-width:620px){footer .right{margin-left:0;text-align:left}}
 
   /* ---- the screenshot gallery ------------------------------------------
      Built from /shots.json rather than written into the page, so adding a
@@ -187,65 +316,112 @@
   .gal{margin-top:26px}
   .galstage{position:relative;border-radius:var(--r);border:1px solid var(--line);
     overflow:hidden;background:var(--panel);aspect-ratio:16/11.6;
-    box-shadow:0 26px 70px -34px rgba(0,0,0,.9)}
+    box-shadow:0 30px 80px -40px rgba(0,0,0,.9);
+    transform:translate3d(0,calc(var(--drift,0) * 1px),0)}
   .galstage img{position:absolute;inset:0;width:100%;height:100%;
     object-fit:cover;object-position:top left;opacity:0;
-    transition:opacity .45s var(--ease)}
-  .galstage img.on{opacity:1}
+    transform:scale(1.035);
+    transition:opacity .55s var(--ease),transform 6s linear}
+  .galstage img.on{opacity:1;transform:scale(1)}
   .galstage .galcap{position:absolute;left:0;right:0;bottom:0;padding:16px 18px;
     z-index:2;
-    background:linear-gradient(0deg,color-mix(in srgb,var(--bg2) 94%,transparent),
+    background:linear-gradient(0deg,color-mix(in srgb,var(--bg) 94%,transparent),
       transparent);pointer-events:none}
   .galstage .galcap b{display:block;font-size:16px;letter-spacing:-.01em}
   .galstage .galcap span{font-size:13px;color:var(--dim)}
-  .galstage .galzoom{position:absolute;top:12px;right:12px;z-index:2;padding:6px 12px;
+  .galstage .galzoom{position:absolute;top:12px;right:12px;z-index:3;padding:6px 12px;
     border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;
     border:1px solid var(--line);color:var(--fg);
-    background:color-mix(in srgb,var(--bg2) 72%,transparent);
-    transition:border-color .15s,transform .15s var(--ease)}
-  .galstage .galzoom:hover{border-color:var(--accent);transform:translateY(-1px)}
+    background:color-mix(in srgb,var(--bg) 70%,transparent);
+    transition:border-color .18s,transform .18s var(--ease)}
+  .galstage .galzoom:hover{border-color:var(--fg);transform:translateY(-1px)}
+  /* how long until it moves on - visible, so it does not feel random */
+  .galbar{position:absolute;left:0;bottom:0;height:2px;z-index:3;
+    background:var(--ink);width:100%;transform:scaleX(0);transform-origin:0 50%}
+  .galbar.run{transition:transform 5.2s linear;transform:scaleX(1)}
 
   .galstrip{display:flex;gap:9px;margin-top:12px;overflow-x:auto;
     padding-bottom:4px;scrollbar-width:thin}
   .galthumb{flex:none;width:132px;border-radius:9px;overflow:hidden;
     border:1px solid var(--line);background:var(--panel);cursor:pointer;
-    padding:0;transition:border-color .16s,transform .16s var(--ease)}
+    padding:0;transition:border-color .18s,transform .18s var(--ease),opacity .25s;
+    opacity:.62}
   .galthumb img{width:100%;height:78px;object-fit:cover;object-position:top left;
     display:block}
   .galthumb .tn{padding:5px 7px;font-size:11px;font-weight:600;color:var(--dim);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .galthumb:hover{transform:translateY(-2px);border-color:var(--accent)}
-  .galthumb[aria-current="true"]{border-color:var(--accent);
-    box-shadow:0 0 0 1px var(--accent)}
+  .galthumb:hover{transform:translateY(-3px);border-color:var(--line2);opacity:1}
+  .galthumb[aria-current="true"]{border-color:var(--fg);opacity:1;
+    box-shadow:0 0 0 1px var(--fg)}
   .galthumb[aria-current="true"] .tn{color:var(--fg)}
 
   /* Full size, because a 16:11 crop of a desktop app is not readable. */
   .lightbox{position:fixed;inset:0;z-index:60;display:none;
-    background:color-mix(in srgb,var(--bg2) 92%,transparent);
-    padding:24px;overflow:auto}
-  .lightbox.on{display:block;animation:lbIn .2s var(--ease) both}
-  @keyframes lbIn{from{opacity:0}to{opacity:1}}
+    background:color-mix(in srgb,var(--bg) 93%,transparent);
+    padding:24px;overflow:auto;backdrop-filter:blur(6px)}
+  .lightbox.on{display:block;animation:lbIn .22s var(--ease) both}
+  @keyframes lbIn{from{opacity:0;transform:scale(.99)}to{opacity:1;transform:none}}
   .lightbox img{display:block;margin:0 auto;max-width:1600px;width:100%;
     border-radius:12px;border:1px solid var(--line)}
   .lbbar{display:flex;gap:10px;align-items:center;justify-content:center;
-    margin-bottom:14px;position:sticky;top:0}
+    margin-bottom:14px;position:sticky;top:0;z-index:2}
   .lbbar button{padding:8px 14px;border-radius:999px;cursor:pointer;
-    border:1px solid var(--line);background:var(--bg1);color:var(--fg);
-    font-size:13px;font-weight:600}
-  .lbbar button:hover{border-color:var(--accent)}
+    border:1px solid var(--line);background:var(--raise);color:var(--fg);
+    font-size:13px;font-weight:600;transition:border-color .18s,transform .18s}
+  .lbbar button:hover{border-color:var(--fg);transform:translateY(-1px)}
   .lbbar span{color:var(--dim);font-size:13px}
 
+  /* ---- back to top --------------------------------------------------- */
+  .up{position:fixed;right:20px;bottom:20px;z-index:35;width:44px;height:44px;
+    border-radius:50%;cursor:pointer;border:1px solid var(--line);
+    background:color-mix(in srgb,var(--bg) 80%,transparent);color:var(--fg);
+    backdrop-filter:blur(8px);display:grid;place-items:center;
+    opacity:0;transform:translateY(14px) scale(.9);pointer-events:none;
+    transition:opacity .3s,transform .3s var(--ease),border-color .2s}
+  .up.on{opacity:1;transform:none;pointer-events:auto}
+  .up:hover{border-color:var(--fg);transform:translateY(-2px)}
+
+  footer{border-top:1px solid var(--line);margin-top:34px;padding:26px 0 46px;
+    color:var(--dimmer);font-size:13.5px;display:flex;gap:18px;flex-wrap:wrap;
+    align-items:center}
+  footer a{text-decoration:none;transition:color .2s}
+  footer a:hover{color:var(--fg)}
+  footer .right{margin-left:auto;max-width:420px;text-align:right}
+  @media(max-width:620px){footer .right{margin-left:0;text-align:left}}
+
+  /* Motion is decoration here, never information: with it off the page
+     still reads top to bottom, and the canvas is not even created. */
   @media (prefers-reduced-motion: reduce){
     *{animation:none!important;transition:none!important}
     html{scroll-behavior:auto}
     .rise{opacity:1;transform:none}
-    #sky{display:none}
+    .word i{transform:none;opacity:1}
+    /* The sheen is a moving gradient. Stopped, it freezes each word on a
+       different slice of it, so some of the headline sits at half
+       contrast - no motion means no gradient at all. */
+    .shine .word i{background:none;color:var(--fg)}
+    #sky,.beam{display:none}
   }
 </style>
+<noscript><style>
+  /* The reveals are driven by script: .rise gets .in from an observer, and
+     the headline is split into words by script too. With scripting off
+     that is 31 invisible blocks and no headline, so everything that starts
+     hidden is simply shown. The page reads fine without a single
+     animation. */
+  .rise{opacity:1!important;transform:none!important}
+  .word i,.sub,.cta,.meta{opacity:1!important;transform:none!important;
+    animation:none!important}
+  .bigmark{animation:none!important;opacity:1!important}
+  .belt{display:none}          /* an empty belt is worse than no belt */
+</style></noscript>
 </head>
 <body>
 
+<div class="rail" aria-hidden="true"><i></i></div>
 <canvas id="sky" aria-hidden="true"></canvas>
+<div class="mesh" aria-hidden="true"></div>
+<div class="beam" id="beam" aria-hidden="true"></div>
 <div class="veil" aria-hidden="true"></div>
 
 <header id="top">
@@ -257,9 +433,18 @@
     <nav>
       <a href="#look">Screenshots</a>
       <a href="#features">Everything it does</a>
+      <a href="#start">Getting started</a>
       <a href="#honest">Before you install</a>
       <a href="#download">Download</a>
       <a href="terms.html">Terms</a>
+      <button class="lamp" id="lamp" type="button" title="Dark or light"
+              aria-label="Switch between dark and light">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>
+          <circle cx="12" cy="12" r="3.6"/>
+        </svg>
+      </button>
     </nav>
   </div>
 </header>
@@ -268,30 +453,21 @@
 
   <div class="hero">
     <div class="bigmark"><img src="logo.svg" alt="Nyxen" width="112" height="112"></div>
-    <h1><span class="shine">One place for your games.</span></h1>
+    <h1><span class="shine" data-split>One place for your games.</span></h1>
     <p class="sub">Mods from four sites at once. Minecraft with whatever launcher
       you already have. Retro achievements. Your friends. One Windows app that
       needs no account to be useful.</p>
     <div class="cta">
-      <a class="btn" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe">Download for Windows</a>
-      <a class="btn ghost" href="#features">Everything it does</a>
+      <a class="btn magnet" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe"><span>Download for Windows</span>
+        <span class="arw" aria-hidden="true">&rarr;</span></a>
+      <a class="btn ghost magnet" href="#look"><span>See it first</span></a>
     </div>
     <p class="meta">Version 1.0.0 &middot; 29.5 MB &middot; Windows 10 and 11
       &middot; no administrator rights needed</p>
-    <div class="themes" role="group" aria-label="Recolour this page">
-      <button class="sw" data-theme="" title="Monochrome"
-              style="background:linear-gradient(135deg,#f4f4f4,#555)"></button>
-      <button class="sw" data-theme="nebula" title="Nebula"
-              style="background:linear-gradient(135deg,#9d8cff,#161033)"></button>
-      <button class="sw" data-theme="aurora" title="Aurora"
-              style="background:linear-gradient(135deg,#6ef2c0,#07231f)"></button>
-      <button class="sw" data-theme="ember" title="Ember"
-              style="background:linear-gradient(135deg,#ff9a4d,#2a1410)"></button>
-      <button class="sw" data-theme="bloom" title="Bloom"
-              style="background:linear-gradient(135deg,#ff5fa2,#2a0f22)"></button>
-    </div>
-    <p class="meta" style="margin-top:8px">Four of the app's 26 themes. The real
-      ones animate the background too.</p>
+  </div>
+
+  <div class="belt" aria-label="What it works with">
+    <div class="beltrun" id="beltrun"></div>
   </div>
 
   <div class="stats rise">
@@ -306,12 +482,13 @@
   </div>
 
   <section id="features">
+    <p class="eyebrow rise">What is in it</p>
     <h2 class="rise">Everything it does</h2>
     <p class="lead rise">Every item here is a feature that exists in the build
       on this page. Nothing on this list is planned, coming soon, or a
       mock-up.</p>
 
-    <div class="grid">
+    <div class="grid" id="cards">
       <div class="card rise">
         <span class="tag">Mods</span>
         <h3>Four mod sites, one search box</h3>
@@ -411,22 +588,23 @@
       <div class="card rise">
         <span class="tag">Look</span>
         <h3>26 themes, six of them alive</h3>
-        <p>Nebula, Aurora, Ember and the rest animate the background behind the
+        <p>Inside the app the backgrounds move — drifting scenes behind the
           interface. All of it stops when the window is not in front, so it
           costs nothing while you are in a game.</p>
       </div>
     </div>
   </section>
 
-
   <section id="look">
+    <p class="eyebrow rise">The real thing</p>
     <h2 class="rise">What it looks like</h2>
-    <p class="lead rise">Screenshots of the running app, not mock-ups. Click
-      one to see it full size.</p>
+    <p class="lead rise">Screenshots of the running app, not mock-ups. It moves
+      through them on its own — click one to see it full size.</p>
     <div class="gal rise" id="gal" hidden>
       <div class="galstage" id="galStage">
         <button class="galzoom" id="galZoom" type="button">Full size</button>
         <div class="galcap"><b id="galTitle"></b><span id="galBlurb"></span></div>
+        <i class="galbar" id="galBar" aria-hidden="true"></i>
       </div>
       <div class="galstrip" id="galStrip" role="tablist"></div>
     </div>
@@ -443,7 +621,35 @@
     <img id="lbImg" alt="">
   </div>
 
+  <section id="start">
+    <p class="eyebrow rise">Getting started</p>
+    <h2 class="rise">Three steps, and none of them is a sign-up</h2>
+    <p class="lead rise">There is no account wall, no key to paste and no
+      launcher to install first.</p>
+    <div class="steps">
+      <div class="step rise">
+        <div class="num">01</div>
+        <h3>Install it</h3>
+        <p>One file, per-user, no administrator rights. It opens itself when
+          it finishes.</p>
+      </div>
+      <div class="step rise">
+        <div class="num">02</div>
+        <h3>It looks around</h3>
+        <p>Steam, your Minecraft launchers and RetroArch are found where they
+          already are. Nothing is moved or rewritten.</p>
+      </div>
+      <div class="step rise">
+        <div class="num">03</div>
+        <h3>Play</h3>
+        <p>Search mods, check achievements, read your ROM shelf. Add friends
+          later, or never.</p>
+      </div>
+    </div>
+  </section>
+
   <section id="honest">
+    <p class="eyebrow rise">No surprises</p>
     <h2 class="rise">Before you install</h2>
     <p class="lead rise">The awkward parts, up front rather than afterwards.</p>
     <div class="rows rise">
@@ -474,13 +680,14 @@
   </section>
 
   <section id="download">
-    <h2 class="rise">Download</h2>
-    <p class="lead rise">One file. Open it, click Install, and it launches.</p>
+    <p class="eyebrow rise">Download</p>
+    <h2 class="rise">One file. Open it, click Install, and it launches.</h2>
     <div class="cta rise" style="justify-content:flex-start">
-      <a class="btn" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe">NyxenSetup.exe &middot; 29.5 MB</a>
-      <a class="btn ghost" href="sha256.txt">Checksum</a>
+      <a class="btn magnet" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe"><span>NyxenSetup.exe &middot; 29.5 MB</span>
+        <span class="arw" aria-hidden="true">&darr;</span></a>
+      <a class="btn ghost magnet" href="sha256.txt"><span>Checksum</span></a>
     </div>
-    <p class="meta">SHA-256 <code>bd13cc85565754ea6fa7fc2c84d6dc1d35a9ed26246412690145e32df4e8c3fd</code><br>
+    <p class="meta">SHA-256 <code>4f09512a7c7cd53caf172a249d595f45831d5c086665b4b53ec2c03b0584744c</code><br>
       Check it with <code>certutil -hashfile NyxenSetup.exe SHA256</code> —
       built into Windows, nothing to install.</p>
     <div class="note rise" style="margin-top:22px">
@@ -502,22 +709,123 @@
   </footer>
 </div>
 
+<button class="up" id="up" type="button" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+       aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <script>
+/* =====================================================================
+   Everything below is decoration. It is all gated on three things:
+     * prefers-reduced-motion - then none of it starts at all
+     * document.hidden        - nothing animates for a tab nobody is on
+     * one rAF per frame      - pointer and scroll handlers only mark a
+                                value dirty; a single loop writes styles,
+                                so moving the mouse cannot cause layout
+                                thrash on every event
+   ===================================================================== */
 (function(){
   "use strict";
   var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var root = document.documentElement;
 
-  /* ---- header condenses once you leave the top ---- */
-  var head = document.getElementById("top");
-  function onScroll(){ head.classList.toggle("stuck", scrollY > 12); }
-  addEventListener("scroll", onScroll, {passive:true}); onScroll();
+  /* ---- dark or light. The only choice left, and both are greyscale. -- */
+  var lamp = document.getElementById("lamp");
+  function setLight(on){
+    document.body.classList.toggle("light", on);
+    document.querySelector('meta[name="theme-color"]')
+      .setAttribute("content", on ? "#ececec" : "#060606");
+    lamp.setAttribute("aria-pressed", String(on));
+    try{ localStorage.setItem("nyxen.site.light", on ? "1" : ""); }catch(e){}
+  }
+  var savedLight = null;
+  try{ savedLight = localStorage.getItem("nyxen.site.light"); }catch(e){}
+  // No saved answer: follow the visitor's own system setting.
+  setLight(savedLight === null
+    ? matchMedia("(prefers-color-scheme: light)").matches
+    : savedLight === "1");
+  lamp.addEventListener("click", function(){
+    setLight(!document.body.classList.contains("light"));
+  });
 
-  /* ---- scroll reveal. One observer, and it unobserves as it goes so the
-          page is not still watching forty elements at the bottom. ---- */
+  /* ---- the headline, split into words so they can arrive in order --- */
+  [].forEach.call(document.querySelectorAll("[data-split]"), function(el){
+    var words = el.textContent.trim().split(/\s+/);
+    el.textContent = "";
+    words.forEach(function(w, i){
+      var s = document.createElement("span");
+      s.className = "word";
+      s.style.setProperty("--i", i);
+      var inner = document.createElement("i");
+      inner.textContent = w;
+      s.appendChild(inner);
+      el.appendChild(s);
+      // A real space between words, so it still selects and reads as text.
+      if(i < words.length - 1) el.appendChild(document.createTextNode(" "));
+    });
+  });
+
+  /* ---- the belt of names, written once and duplicated for the loop.
+          Two copies is what makes translateX(-50%) seamless. ---------- */
+  var NAMES = ["Steam","Modrinth","Thunderstore","GameBanana","Steam Workshop",
+    "RetroArch","RetroAchievements","libretro","Minecraft","Prism","MultiMC",
+    "CurseForge","ATLauncher","GDLauncher","XMCL","Fabric","NeoForge","Quilt",
+    "Iris","OptiFine"];
+  var run = document.getElementById("beltrun");
+  NAMES.forEach(function(n){
+    var b = document.createElement("b");
+    b.textContent = n;
+    run.appendChild(b);
+  });
+  // Exactly one more copy of the same nodes. translateX(-50%) only looks
+  // seamless if the second half is identical to the first - building it by
+  // hand had an extra item at the front, and the loop jumped once a cycle.
+  [].slice.call(run.children).forEach(function(b){
+    run.appendChild(b.cloneNode(true));
+  });
+
+  /* ---- header state, scroll rail, back-to-top ----------------------- */
+  var head = document.getElementById("top"), up = document.getElementById("up");
+  var scrollDirty = true;
+  function onScroll(){ scrollDirty = true; }
+  addEventListener("scroll", onScroll, {passive:true});
+
+  function readScroll(){
+    if(!scrollDirty) return;
+    scrollDirty = false;
+    var y = scrollY || 0;
+    var max = Math.max(1, document.body.scrollHeight - innerHeight);
+    head.classList.toggle("stuck", y > 12);
+    up.classList.toggle("on", y > 700);
+    root.style.setProperty("--rail", Math.min(1, y / max).toFixed(4));
+    // The gallery drifts a little against the scroll - a few pixels, not a
+    // parallax stunt that fights the user's scrolling.
+    var stage = document.getElementById("galStage");
+    if(stage && !reduce){
+      var r = stage.getBoundingClientRect();
+      var k = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+      stage.style.setProperty("--drift", (Math.max(-1, Math.min(1, k)) * -14).toFixed(1));
+    }
+  }
+  up.addEventListener("click", function(){
+    scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+  });
+
+  /* ---- reveal on scroll, staggered within each group ---------------- */
   var rise = [].slice.call(document.querySelectorAll(".rise"));
   if(!("IntersectionObserver" in window) || reduce){
     rise.forEach(function(el){ el.classList.add("in"); });
+    countUp();
   }else{
+    // Index within the parent, so a row of cards cascades instead of all
+    // nine appearing at once.
+    rise.forEach(function(el){
+      var sibs = [].slice.call(el.parentNode.children).filter(function(n){
+        return n.classList && n.classList.contains("rise");
+      });
+      el.style.setProperty("--d", Math.min(6, sibs.indexOf(el)));
+    });
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
         if(!e.isIntersecting) return;
@@ -529,14 +837,32 @@
     rise.forEach(function(el){ io.observe(el); });
   }
 
-  /* ---- the numbers count once, when they appear ---- */
+  /* ---- which section you are in, marked in the nav ------------------ */
+  var links = [].slice.call(document.querySelectorAll('header nav a[href^="#"]'));
+  if("IntersectionObserver" in window && links.length){
+    var seen = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(!e.isIntersecting) return;
+        links.forEach(function(a){
+          a.setAttribute("aria-current",
+            String(a.getAttribute("href") === "#" + e.target.id));
+        });
+      });
+    }, {rootMargin:"-45% 0px -50% 0px"});
+    links.forEach(function(a){
+      var t = document.getElementById(a.getAttribute("href").slice(1));
+      if(t) seen.observe(t);
+    });
+  }
+
+  /* ---- the numbers count once, when they appear --------------------- */
   var counted = false;
   function countUp(){
     if(counted) return; counted = true;
     [].forEach.call(document.querySelectorAll("[data-count]"), function(el){
       var target = parseInt(el.getAttribute("data-count"), 10) || 0;
       if(reduce){ el.textContent = target; return; }
-      var t0 = performance.now(), dur = 900;
+      var t0 = performance.now(), dur = 1000;
       (function step(now){
         var k = Math.min(1, (now - t0) / dur);
         // ease-out, so it decelerates into the real figure instead of
@@ -547,40 +873,67 @@
     });
   }
 
-  /* ---- theme picker. Remembers your choice; the swatches are the app's
-          actual Eclipse palettes. ---- */
-  var swatches = [].slice.call(document.querySelectorAll(".sw"));
-  function applyTheme(name){
-    if(name) document.body.setAttribute("data-theme", name);
-    else document.body.removeAttribute("data-theme");
-    swatches.forEach(function(b){
-      b.setAttribute("aria-pressed", String(b.dataset.theme === name));
+  if(reduce){ readScroll(); return; }
+
+  /* ---- pointer: the beam, the grid offset, magnet buttons, and the
+          light inside whichever card you are over. One listener, one
+          frame, no style writes from the event itself. ---------------- */
+  var beam = document.getElementById("beam");
+  var pt = {x:innerWidth / 2, y:innerHeight / 2}, ptDirty = false, hasPt = false;
+  addEventListener("pointermove", function(e){
+    if(e.pointerType === "touch") return;    // no cursor, no beam
+    pt.x = e.clientX; pt.y = e.clientY; ptDirty = true;
+    if(!hasPt){ hasPt = true; document.body.classList.add("hasbeam"); }
+  }, {passive:true});
+
+  var magnets = [].slice.call(document.querySelectorAll(".magnet"));
+  function readPointer(){
+    if(!ptDirty) return;
+    ptDirty = false;
+    beam.style.transform = "translate3d(" + pt.x + "px," + pt.y + "px,0)";
+    root.style.setProperty("--px", ((pt.x / innerWidth) * 2 - 1).toFixed(3));
+    root.style.setProperty("--py", ((pt.y / innerHeight) * 2 - 1).toFixed(3));
+
+    // Buttons lean towards the cursor while it is close, and let go after.
+    magnets.forEach(function(el){
+      var r = el.getBoundingClientRect();
+      var dx = pt.x - (r.left + r.width / 2), dy = pt.y - (r.top + r.height / 2);
+      var near = Math.abs(dx) < r.width / 2 + 70 && Math.abs(dy) < r.height / 2 + 50;
+      el.style.setProperty("--mx", near ? (dx * 0.12).toFixed(1) + "px" : "0px");
+      el.style.setProperty("--my", near ? (dy * 0.18).toFixed(1) + "px" : "0px");
     });
-    try{ localStorage.setItem("nyxen.site.theme", name); }catch(e){}
-    skyColour();
   }
-  swatches.forEach(function(b){
-    b.addEventListener("click", function(){ applyTheme(b.dataset.theme); });
+
+  // Cards: the light follows the pointer, and the card tips very slightly
+  // towards it. Bound per card so there is no hit-testing every frame.
+  [].forEach.call(document.querySelectorAll(".card"), function(card){
+    card.addEventListener("pointermove", function(e){
+      if(e.pointerType === "touch") return;
+      var r = card.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      card.style.setProperty("--cx", x + "px");
+      card.style.setProperty("--cy", y + "px");
+      var rx = ((y / r.height) - 0.5) * -4, ry = ((x / r.width) - 0.5) * 4;
+      card.style.transform = "translateY(-4px) rotateX(" + rx.toFixed(2)
+        + "deg) rotateY(" + ry.toFixed(2) + "deg)";
+    }, {passive:true});
+    card.addEventListener("pointerleave", function(){
+      card.style.transform = "";
+    });
   });
-  var saved = "";
-  try{ saved = localStorage.getItem("nyxen.site.theme") || ""; }catch(e){}
-  applyTheme(saved);
 
-  /* ---- the backdrop ----
-     Drifting points, recoloured from the theme's accent. Capped at 30fps
-     because nothing here needs 60, paused when the tab is hidden, and not
-     created at all under reduced motion. */
+  /* ---- the canvas: drifting points, joined when they are close, and
+          nudged away from the cursor. Greyscale, 30fps, and it stops
+          dead when the tab is hidden. ------------------------------- */
   var cv = document.getElementById("sky");
-  if(reduce || !cv){ if(cv) cv.remove(); return; }
-  var ctx = cv.getContext("2d"), pts = [], w = 0, h = 0, dpr = 1, tint = "255,255,255";
+  var ctx = cv && cv.getContext("2d");
+  var pts = [], w = 0, h = 0, dpr = 1, tint = "255,255,255";
 
-  function skyColour(){
-    var a = getComputedStyle(document.body).getPropertyValue("--accent").trim();
-    var probe = document.createElement("span");
-    probe.style.color = a; document.body.appendChild(probe);
-    var m = /rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(getComputedStyle(probe).color);
-    probe.remove();
-    if(m) tint = m[1] + "," + m[2] + "," + m[3];
+  function colours(){
+    // Read the dot colour from the stylesheet rather than hardcoding it
+    // twice: light mode inverts it, and this way it cannot disagree.
+    tint = getComputedStyle(document.body).getPropertyValue("--dot").trim()
+           || "255,255,255";
   }
 
   function size(){
@@ -590,14 +943,14 @@
     cv.style.width = w + "px"; cv.style.height = h + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // Point count from area, so a phone does not draw a desktop's worth.
-    var want = Math.round(Math.min(150, (w * h) / 12000));
+    var want = Math.round(Math.min(120, (w * h) / 15000));
     pts = [];
     for(var i = 0; i < want; i++){
-      pts.push({x:Math.random()*w, y:Math.random()*h,
-                r:Math.random()*1.5+0.35,
-                vx:(Math.random()-0.5)*0.10, vy:(Math.random()-0.5)*0.10,
-                a:Math.random()*0.5+0.16,
-                tw:Math.random()*Math.PI*2});
+      pts.push({x:Math.random() * w, y:Math.random() * h,
+                r:Math.random() * 1.4 + 0.35,
+                vx:(Math.random() - 0.5) * 0.11, vy:(Math.random() - 0.5) * 0.11,
+                a:Math.random() * 0.45 + 0.14,
+                tw:Math.random() * Math.PI * 2});
     }
   }
 
@@ -605,35 +958,75 @@
   function frame(now){
     requestAnimationFrame(frame);
     if(document.hidden) return;              // nothing to draw for nobody
-    if(now - last < 33) return;              // ~30fps
+    if(now - last < 33) return;              // ~30fps is plenty for drift
     last = now;
+    readScroll();
+    readPointer();
     ctx.clearRect(0, 0, w, h);
-    for(var i = 0; i < pts.length; i++){
-      var p = pts[i];
-      p.x += p.vx; p.y += p.vy; p.tw += 0.012;
+
+    var i, p, q, dx, dy, d2;
+    for(i = 0; i < pts.length; i++){
+      p = pts[i];
+      p.x += p.vx; p.y += p.vy; p.tw += 0.013;
+      // A gentle push away from the cursor. Capped, so flicking the mouse
+      // across the screen cannot fling the field apart.
+      if(hasPt){
+        dx = p.x - pt.x; dy = p.y - pt.y; d2 = dx * dx + dy * dy;
+        if(d2 < 20000 && d2 > 1){
+          var f = (1 - d2 / 20000) * 0.55, m = Math.sqrt(d2);
+          p.x += (dx / m) * f; p.y += (dy / m) * f;
+        }
+      }
       if(p.x < -5) p.x = w + 5; else if(p.x > w + 5) p.x = -5;
       if(p.y < -5) p.y = h + 5; else if(p.y > h + 5) p.y = -5;
-      var alpha = p.a * (0.72 + 0.28 * Math.sin(p.tw));
+    }
+
+    // Links first, so the dots sit on top of them.
+    ctx.lineWidth = 1;
+    for(i = 0; i < pts.length; i++){
+      p = pts[i];
+      for(var j = i + 1; j < pts.length; j++){
+        q = pts[j];
+        dx = p.x - q.x; dy = p.y - q.y; d2 = dx * dx + dy * dy;
+        if(d2 > 13000) continue;
+        ctx.strokeStyle = "rgba(" + tint + ","
+          + (0.085 * (1 - d2 / 13000)).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+        ctx.stroke();
+      }
+    }
+    for(i = 0; i < pts.length; i++){
+      p = pts[i];
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, 6.2832);
-      ctx.fillStyle = "rgba(" + tint + "," + alpha.toFixed(3) + ")";
+      ctx.fillStyle = "rgba(" + tint + ","
+        + (p.a * (0.7 + 0.3 * Math.sin(p.tw))).toFixed(3) + ")";
       ctx.fill();
     }
   }
 
-  skyColour();
-  size();
-  addEventListener("resize", size);
-  requestAnimationFrame(frame);
+  if(ctx){
+    colours();
+    lamp.addEventListener("click", colours);
+    size();
+    addEventListener("resize", size);
+    requestAnimationFrame(frame);
+  }else{
+    // No canvas: the scroll and pointer work still has to happen.
+    (function loop(){ requestAnimationFrame(loop);
+      if(document.hidden) return; readScroll(); readPointer(); })();
+  }
 })();
 
 /* ---- the screenshot gallery ----
-   The list comes from the server, which reads the folder. Adding a shot is
-   dropping a PNG in and redeploying; nothing here needs changing, and the
-   page cannot claim a screenshot that is not there. */
+   The list comes from shots.json, which is generated from the folder.
+   Adding a shot is dropping a PNG in and redeploying; nothing here needs
+   changing, and the page cannot claim a screenshot that is not there. */
 (function(){
   "use strict";
-  var shots = [], at = 0, imgs = [];
+  var shots = [], at = 0, imgs = [], timer = 0, held = false;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function show(i){
     if(!shots.length) return;
@@ -646,7 +1039,27 @@
     });
     var lb = document.getElementById("lightbox");
     if(lb.classList.contains("on")) paint();
+    queue();
   }
+
+  /* It advances on its own, and says how long is left. Restarting the bar
+     needs the class off for one frame or the transition does not replay. */
+  function queue(){
+    clearTimeout(timer);
+    var bar = document.getElementById("galBar");
+    if(!bar) return;
+    bar.classList.remove("run");
+    if(reduce || held || shots.length < 2
+       || document.getElementById("lightbox").classList.contains("on")){
+      return;
+    }
+    requestAnimationFrame(function(){ bar.classList.add("run"); });
+    timer = setTimeout(function(){
+      if(!document.hidden) show(at + 1);
+      else queue();                       // wait until somebody is looking
+    }, 5200);
+  }
+  function hold(on){ held = on; queue(); }
 
   function paint(){
     document.getElementById("lbImg").src = shots[at].file;
@@ -661,10 +1074,12 @@
     document.getElementById("lightbox").classList.add("on");
     // Stop the page behind from scrolling while the overlay is up.
     document.body.style.overflow = "hidden";
+    queue();
   }
   function closeLb(){
     document.getElementById("lightbox").classList.remove("on");
     document.body.style.overflow = "";
+    queue();
   }
 
   fetch("shots.json").then(function(r){ return r.json(); }).then(function(d){
@@ -698,6 +1113,13 @@
       strip.appendChild(b);
     });
     show(0);
+
+    // Looking at it, or reading the strip, stops it moving under you.
+    stage.addEventListener("pointerenter", function(){ hold(true); });
+    stage.addEventListener("pointerleave", function(){ hold(false); });
+    strip.addEventListener("pointerenter", function(){ hold(true); });
+    strip.addEventListener("pointerleave", function(){ hold(false); });
+    document.addEventListener("visibilitychange", queue);
 
     document.getElementById("galZoom").addEventListener("click", openLb);
     stage.addEventListener("click", function(e){
