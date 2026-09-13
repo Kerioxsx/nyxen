@@ -124,6 +124,10 @@
   .lamp svg{width:16px;height:16px;display:block}
   /* On a phone the links go and the light switch stays - it is the one
      control, and the sections are a swipe away anyway. */
+  /* The six links do not fit comfortably on compact laptops or tablets.
+     Tighten them before the phone layout takes over, rather than letting the
+     header wrap or overflow. */
+  @media(max-width:980px){header nav{gap:10px;font-size:12px}.lamp{margin-left:6px}}
   @media(max-width:760px){header nav a{display:none}}
 
   /* ---- hero ---------------------------------------------------------- */
@@ -222,8 +226,11 @@
     background:var(--dimmer)}
 
   /* ---- counters ------------------------------------------------------ */
-  .stats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  .stats{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr));
     padding:30px 0 10px}
+  /* Keep the four counters balanced at tablet and phone widths.  auto-fit
+     made a narrow desktop view show three cards with one stranded below. */
+  @media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .stat{text-align:center;border:1px solid var(--line);border-radius:14px;
     padding:18px 12px;background:var(--panel);position:relative;overflow:hidden;
     transition:transform .25s var(--ease),border-color .25s}
@@ -1082,6 +1089,8 @@
     queue();
   }
 
+  // A relative URL works both in a local preview and under GitHub Pages'
+  // /nyxen/ project path.  An absolute path points at the wrong site root.
   fetch("shots.json").then(function(r){ return r.json(); }).then(function(d){
     shots = (d && d.shots) || [];
     if(!shots.length) return;            // no shots, no empty section
