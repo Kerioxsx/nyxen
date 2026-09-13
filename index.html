@@ -100,10 +100,13 @@
     background:color-mix(in srgb,var(--bg) 76%,transparent)}
   .hrow{display:flex;align-items:center;gap:12px;padding:14px 0}
   .mark{width:38px;height:38px;flex:none;border-radius:11px;
-    background:var(--raise);display:grid;place-items:center;overflow:hidden;
-    box-shadow:0 0 0 1px var(--line), 0 0 22px -8px var(--glow);
+    background:transparent;display:grid;place-items:center;overflow:hidden;
+    box-shadow:none;
     transition:transform .5s var(--ease),box-shadow .4s}
-  .mark img{width:100%;height:100%;display:block}
+  /* The source mark contains a black square. Blend it into the page so the
+     visible logo is the artwork, not a tile behind it. */
+  .mark img,.bigmark img{width:100%;height:100%;display:block;mix-blend-mode:screen}
+  body.light .mark img,body.light .bigmark img{filter:invert(1);mix-blend-mode:multiply}
   a.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
   a.brand:hover .mark{transform:rotate(-9deg) scale(1.07);
     box-shadow:0 0 0 1px var(--line2), 0 0 30px -6px var(--glow)}
@@ -133,11 +136,11 @@
   /* ---- hero ---------------------------------------------------------- */
   .hero{text-align:center;padding:76px 0 30px;position:relative}
   .bigmark{width:112px;height:112px;margin:0 auto 26px;border-radius:27px;
-    background:var(--raise);display:grid;place-items:center;overflow:hidden;
+    background:transparent;display:grid;place-items:center;overflow:hidden;
     position:relative;
-    box-shadow:0 0 0 1px var(--line), 0 24px 64px -24px var(--glow);
+    box-shadow:0 24px 64px -24px var(--glow);
     animation:markIn 1s var(--ease) both, float 9s ease-in-out 1.1s infinite}
-  .bigmark img{width:100%;height:100%;display:block;position:relative;z-index:1}
+  .bigmark img{position:relative;z-index:1}
   /* two rings that breathe outwards, like the app's pulse on a live card */
   .bigmark::before,.bigmark::after{content:"";position:absolute;inset:0;
     border-radius:inherit;border:1px solid var(--line2);
@@ -469,7 +472,7 @@
         <span class="arw" aria-hidden="true">&rarr;</span></a>
       <a class="btn ghost magnet" href="#look"><span>See it first</span></a>
     </div>
-    <p class="meta">Version 1.0.0 &middot; 29.6 MB &middot; Windows 10 and 11
+    <p class="meta">Version 1.1.0 &middot; 29.6 MB &middot; Windows 10 and 11
       &middot; no administrator rights needed</p>
   </div>
 
@@ -694,7 +697,7 @@
         <span class="arw" aria-hidden="true">&darr;</span></a>
       <a class="btn ghost magnet" href="sha256.txt"><span>Checksum</span></a>
     </div>
-    <p class="meta">SHA-256 <code>61e7f235b5aca165b2c3406e3438c645294fe0f52b90a54422cded148451c604</code><br>
+    <p class="meta">SHA-256 <code>46123364ea9e204628ef6d0c837a8277f00a4b555360f72dddc30622b4adcb3e</code><br>
       Check it with <code>certutil -hashfile NyxenSetup.exe SHA256</code> —
       built into Windows, nothing to install.</p>
     <div class="note rise" style="margin-top:22px">
@@ -708,7 +711,7 @@
   <footer>
     <span class="mark" style="width:26px;height:26px;border-radius:8px">
       <img src="logo.svg" alt="" width="26" height="26"></span>
-    <span>Nyxen 1.0.0 — made by Antonio</span>
+    <span>Nyxen 1.1.0 — made by Antonio</span>
     <a href="terms.html">Terms</a>
     <a href="https://github.com/Kerioxsx/nyxen/releases/download/v1.1.0/NyxenSetup.exe">Download</a>
     <span class="right">Not affiliated with Valve, Mojang, Microsoft, Modrinth,

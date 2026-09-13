@@ -25,9 +25,10 @@
   .wrap{max-width:800px;margin:0 auto;padding:0 22px}
   header{display:flex;align-items:center;gap:12px;padding:18px 0;
     border-bottom:1px solid var(--line);margin-bottom:8px}
-  .mark{width:32px;height:32px;border-radius:9px;background:#0a0a0a;flex:none;
-    overflow:hidden;box-shadow:0 0 0 1px var(--line)}
-  .mark img{width:100%;height:100%;display:block}
+  .mark{width:32px;height:32px;border-radius:9px;background:transparent;flex:none;
+    overflow:hidden;box-shadow:none}
+  .mark img{width:100%;height:100%;display:block;mix-blend-mode:screen}
+  body.light .mark img{filter:invert(1);mix-blend-mode:multiply}
   a.brand{display:flex;align-items:center;gap:11px;text-decoration:none;
     font-weight:800;letter-spacing:-.02em}
   header nav{margin-left:auto;display:flex;gap:16px;font-size:14px;color:var(--dim)}
@@ -102,7 +103,7 @@
 </header>
 
 <h1>Terms and privacy</h1>
-<p class="updated">Last updated 13 September 2026 &middot; applies to Nyxen 1.0.0</p>
+<p class="updated">Last updated 13 September 2026 &middot; applies to Nyxen 1.1.0</p>
 
 <div class="box">
   <p><strong>The short version.</strong> Nyxen is free and made by one person.
@@ -272,7 +273,7 @@ whichever channel you were given the app.</p>
 position for a free project made by one person.</p>
 
 <footer>
-  <span>Nyxen 1.0.0</span>
+  <span>Nyxen 1.1.0</span>
   <a href="index.html">Home</a>
   <a href="https://github.com/Kerioxsx/nyxen/releases/download/v1.1.0/NyxenSetup.exe">Download</a>
   <a href="sha256.txt">Checksum</a>
