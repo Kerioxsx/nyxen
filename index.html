@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nyxen — one place for your games</title>
+<meta name="description" content="A Windows companion for your games: mods from four sites at once, Minecraft with any launcher, RetroArch achievements, friends and calls. Free, one click, no account needed.">
+<meta name="theme-color" content="#0b0b0b">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta property="og:title" content="Nyxen">
+<meta property="og:description" content="Mods, Minecraft, retro achievements and friends, in one Windows app.">
+<meta property="og:image" content="logo.svg">
+<meta property="og:type" content="website">
+<style>
+  /* The app's own Eclipse palettes, so the site can be recoloured with the
+     same themes the app ships. Default is the plain dark one. */
+  :root{
+    --bg1:#141414; --bg2:#070707; --fg:#f4f4f4; --dim:#9a9a9a; --dimmer:#6a6a6a;
+    --line:rgba(255,255,255,.10); --panel:rgba(255,255,255,.035);
+    --panel2:rgba(255,255,255,.06);
+    --accent:#f4f4f4; --accent2:#666; --accent-fg:#0a0a0a;
+    --glow:rgba(255,255,255,.40);
+    --r:16px; --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  body[data-theme="nebula"]{--bg1:#161033;--bg2:#04020c;--accent:#9d8cff;--accent2:#4b3a9e;
+    --accent-fg:#0a0618;--glow:rgba(157,140,255,.45);--line:rgba(170,155,255,.16);
+    --panel:rgba(170,155,255,.05);--panel2:rgba(170,155,255,.09)}
+  body[data-theme="aurora"]{--bg1:#07231f;--bg2:#01090a;--accent:#6ef2c0;--accent2:#2b7fa8;
+    --accent-fg:#02140f;--glow:rgba(110,242,192,.42);--line:rgba(130,245,205,.16);
+    --panel:rgba(130,245,205,.05);--panel2:rgba(130,245,205,.09)}
+  body[data-theme="ember"]{--bg1:#2a1410;--bg2:#0b0402;--accent:#ff9a4d;--accent2:#a8451f;
+    --accent-fg:#1a0a04;--glow:rgba(255,154,77,.45);--line:rgba(255,180,130,.16);
+    --panel:rgba(255,180,130,.05);--panel2:rgba(255,180,130,.09)}
+  body[data-theme="bloom"]{--bg1:#2a0f22;--bg2:#0b0208;--accent:#ff5fa2;--accent2:#a82b6b;
+    --accent-fg:#1a0410;--glow:rgba(255,95,162,.45);--line:rgba(255,140,190,.16);
+    --panel:rgba(255,140,190,.05);--panel2:rgba(255,140,190,.09)}
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;color:var(--fg);background:var(--bg2);
+    font:16px/1.6 system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+    transition:background .6s var(--ease), color .6s var(--ease)}
+  a{color:inherit}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
+
+  /* ---- the moving backdrop ------------------------------------------
+     A canvas, the same idea as the app's Eclipse scenes: drifting points
+     with a few brighter ones, recoloured by the active theme. Capped at
+     30fps, stopped when the tab is hidden, and never started at all if the
+     visitor asked for reduced motion. */
+  #sky{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.75}
+  .veil{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(90% 60% at 50% -10%,
+        color-mix(in srgb,var(--accent) 10%,transparent),transparent 60%),
+      linear-gradient(180deg,transparent,var(--bg2) 88%)}
+
+  /* ---- header -------------------------------------------------------- */
+  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);
+    border-bottom:1px solid transparent;transition:border-color .3s,background .3s}
+  header.stuck{border-color:var(--line);
+    background:color-mix(in srgb,var(--bg2) 78%,transparent)}
+  .hrow{display:flex;align-items:center;gap:12px;padding:14px 0}
+  .mark{width:38px;height:38px;flex:none;border-radius:11px;background:#0a0a0a;
+    display:grid;place-items:center;overflow:hidden;
+    box-shadow:0 0 0 1px var(--line), 0 0 22px -6px var(--glow);
+    transition:transform .5s var(--ease), box-shadow .4s}
+  .mark img{width:100%;height:100%;display:block}
+  a.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+  a.brand:hover .mark{transform:rotate(-8deg) scale(1.06);
+    box-shadow:0 0 0 1px var(--accent), 0 0 30px -4px var(--glow)}
+  .bname{font-weight:800;letter-spacing:-.02em;font-size:18px}
+  header nav{margin-left:auto;display:flex;gap:18px;font-size:14px;color:var(--dim)}
+  header nav a{text-decoration:none;position:relative;padding:3px 0}
+  header nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;
+    height:1px;background:var(--accent);transition:right .25s var(--ease)}
+  header nav a:hover{color:var(--fg)}
+  header nav a:hover::after{right:0}
+  @media(max-width:680px){header nav{display:none}}
+
+  /* ---- hero ---------------------------------------------------------- */
+  .hero{text-align:center;padding:74px 0 34px}
+  .bigmark{width:112px;height:112px;margin:0 auto 26px;border-radius:26px;
+    background:#0a0a0a;display:grid;place-items:center;overflow:hidden;
+    box-shadow:0 0 0 1px var(--line), 0 22px 60px -20px var(--glow);
+    animation:markIn 1s var(--ease) both, float 8s ease-in-out 1s infinite}
+  .bigmark img{width:100%;height:100%;display:block}
+  @keyframes markIn{from{opacity:0;transform:translateY(18px) scale(.9) rotate(-10deg)}
+    to{opacity:1;transform:none}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+  h1{font-size:clamp(36px,7vw,68px);line-height:1.02;letter-spacing:-.04em;
+    margin:0 0 18px;font-weight:800}
+  h1 .shine{background:linear-gradient(100deg,var(--fg) 20%,var(--accent) 45%,var(--fg) 70%);
+    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;
+    color:transparent;animation:shine 7s linear infinite}
+  @keyframes shine{to{background-position:-220% 0}}
+  .sub{font-size:clamp(16px,2.1vw,20px);color:var(--dim);max-width:660px;
+    margin:0 auto 30px}
+
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;
+    border-radius:999px;text-decoration:none;font-weight:700;font-size:16px;
+    background:var(--accent);color:var(--accent-fg);border:1px solid var(--accent);
+    position:relative;overflow:hidden;
+    transition:transform .18s var(--ease),box-shadow .18s var(--ease)}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 16px 38px -12px var(--glow)}
+  .btn::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);
+    transform:translateX(-120%);animation:sweep 4.5s ease-in-out 1.5s infinite}
+  @keyframes sweep{0%{transform:translateX(-120%)}45%,100%{transform:translateX(120%)}}
+  .btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+  .btn.ghost::after{display:none}
+  .btn.ghost:hover{border-color:var(--fg)}
+  .meta{color:var(--dimmer);font-size:13px;margin-top:16px}
+
+  /* ---- counters ------------------------------------------------------ */
+  .stats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    padding:34px 0 10px}
+  .stat{text-align:center;border:1px solid var(--line);border-radius:14px;
+    padding:18px 12px;background:var(--panel)}
+  .stat .n{font-size:clamp(22px,3.6vw,32px);font-weight:800;letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;color:var(--fg)}
+  .stat .l{font-size:12.5px;color:var(--dim);margin-top:3px}
+
+  /* ---- sections ------------------------------------------------------ */
+  section{padding:44px 0}
+  h2{font-size:clamp(24px,3.6vw,34px);letter-spacing:-.03em;margin:0 0 8px}
+  .lead{color:var(--dim);margin:0 0 26px;max-width:700px}
+
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .card{border:1px solid var(--line);border-radius:var(--r);padding:22px;
+    background:linear-gradient(180deg,var(--panel2),transparent 70%),var(--panel);
+    position:relative;overflow:hidden;
+    transition:transform .2s var(--ease),border-color .2s,box-shadow .2s}
+  .card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+    box-shadow:0 18px 44px -22px var(--glow)}
+  .card h3{margin:0 0 8px;font-size:17.5px;letter-spacing:-.015em}
+  .card p{margin:0;color:var(--dim);font-size:14.5px}
+  .card .tag{display:inline-block;margin-bottom:12px;font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.12em;color:var(--accent);
+    border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
+    border-radius:999px;padding:3px 10px}
+  .card ul{margin:10px 0 0;padding-left:18px;color:var(--dim);font-size:14px}
+  .card li{margin:3px 0}
+
+  /* scroll reveal */
+  .rise{opacity:0;transform:translateY(20px);
+    transition:opacity .6s var(--ease),transform .6s var(--ease)}
+  .rise.in{opacity:1;transform:none}
+
+  .rows{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+    background:var(--panel)}
+  .row{display:flex;gap:16px;padding:16px 20px;align-items:baseline}
+  .row+.row{border-top:1px solid var(--line)}
+  .row b{flex:none;width:200px;font-weight:600}
+  .row span{color:var(--dim);font-size:14.5px}
+  @media(max-width:620px){.row{flex-direction:column;gap:4px}.row b{width:auto}}
+
+  .note{border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:10px;padding:16px 18px;color:var(--dim);font-size:14.5px;
+    background:var(--panel)}
+  .note b{color:var(--fg)}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;
+    background:var(--panel2);padding:2px 6px;border-radius:5px;word-break:break-all}
+
+  /* ---- theme picker -------------------------------------------------- */
+  .themes{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;
+    padding:8px 0 0}
+  .sw{width:30px;height:30px;border-radius:50%;cursor:pointer;border:1px solid var(--line);
+    transition:transform .16s var(--ease),box-shadow .16s}
+  .sw:hover{transform:scale(1.14)}
+  .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--bg2),0 0 0 4px var(--accent)}
+
+  footer{border-top:1px solid var(--line);margin-top:34px;padding:26px 0 46px;
+    color:var(--dimmer);font-size:13.5px;display:flex;gap:18px;flex-wrap:wrap;
+    align-items:center}
+  footer a{text-decoration:none}
+  footer a:hover{color:var(--fg)}
+  footer .right{margin-left:auto;max-width:420px;text-align:right}
+  @media(max-width:620px){footer .right{margin-left:0;text-align:left}}
+
+  /* ---- the screenshot gallery ------------------------------------------
+     Built from /shots.json rather than written into the page, so adding a
+     screenshot is dropping a PNG into shots/ and redeploying. The page needs
+     no edit and cannot get out of step with the folder. */
+  .gal{margin-top:26px}
+  .galstage{position:relative;border-radius:var(--r);border:1px solid var(--line);
+    overflow:hidden;background:var(--panel);aspect-ratio:16/11.6;
+    box-shadow:0 26px 70px -34px rgba(0,0,0,.9)}
+  .galstage img{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;object-position:top left;opacity:0;
+    transition:opacity .45s var(--ease)}
+  .galstage img.on{opacity:1}
+  .galstage .galcap{position:absolute;left:0;right:0;bottom:0;padding:16px 18px;
+    z-index:2;
+    background:linear-gradient(0deg,color-mix(in srgb,var(--bg2) 94%,transparent),
+      transparent);pointer-events:none}
+  .galstage .galcap b{display:block;font-size:16px;letter-spacing:-.01em}
+  .galstage .galcap span{font-size:13px;color:var(--dim)}
+  .galstage .galzoom{position:absolute;top:12px;right:12px;z-index:2;padding:6px 12px;
+    border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;
+    border:1px solid var(--line);color:var(--fg);
+    background:color-mix(in srgb,var(--bg2) 72%,transparent);
+    transition:border-color .15s,transform .15s var(--ease)}
+  .galstage .galzoom:hover{border-color:var(--accent);transform:translateY(-1px)}
+
+  .galstrip{display:flex;gap:9px;margin-top:12px;overflow-x:auto;
+    padding-bottom:4px;scrollbar-width:thin}
+  .galthumb{flex:none;width:132px;border-radius:9px;overflow:hidden;
+    border:1px solid var(--line);background:var(--panel);cursor:pointer;
+    padding:0;transition:border-color .16s,transform .16s var(--ease)}
+  .galthumb img{width:100%;height:78px;object-fit:cover;object-position:top left;
+    display:block}
+  .galthumb .tn{padding:5px 7px;font-size:11px;font-weight:600;color:var(--dim);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .galthumb:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .galthumb[aria-current="true"]{border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent)}
+  .galthumb[aria-current="true"] .tn{color:var(--fg)}
+
+  /* Full size, because a 16:11 crop of a desktop app is not readable. */
+  .lightbox{position:fixed;inset:0;z-index:60;display:none;
+    background:color-mix(in srgb,var(--bg2) 92%,transparent);
+    padding:24px;overflow:auto}
+  .lightbox.on{display:block;animation:lbIn .2s var(--ease) both}
+  @keyframes lbIn{from{opacity:0}to{opacity:1}}
+  .lightbox img{display:block;margin:0 auto;max-width:1600px;width:100%;
+    border-radius:12px;border:1px solid var(--line)}
+  .lbbar{display:flex;gap:10px;align-items:center;justify-content:center;
+    margin-bottom:14px;position:sticky;top:0}
+  .lbbar button{padding:8px 14px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--line);background:var(--bg1);color:var(--fg);
+    font-size:13px;font-weight:600}
+  .lbbar button:hover{border-color:var(--accent)}
+  .lbbar span{color:var(--dim);font-size:13px}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important}
+    html{scroll-behavior:auto}
+    .rise{opacity:1;transform:none}
+    #sky{display:none}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+
+<header id="top">
+  <div class="wrap hrow">
+    <a class="brand" href="index.html">
+      <span class="mark"><img src="logo.svg" alt="" width="38" height="38"></span>
+      <span class="bname">Nyxen</span>
+    </a>
+    <nav>
+      <a href="#look">Screenshots</a>
+      <a href="#features">Everything it does</a>
+      <a href="#honest">Before you install</a>
+      <a href="#download">Download</a>
+      <a href="terms.html">Terms</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="bigmark"><img src="logo.svg" alt="Nyxen" width="112" height="112"></div>
+    <h1><span class="shine">One place for your games.</span></h1>
+    <p class="sub">Mods from four sites at once. Minecraft with whatever launcher
+      you already have. Retro achievements. Your friends. One Windows app that
+      needs no account to be useful.</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe">Download for Windows</a>
+      <a class="btn ghost" href="#features">Everything it does</a>
+    </div>
+    <p class="meta">Version 1.0.0 &middot; 29.5 MB &middot; Windows 10 and 11
+      &middot; no administrator rights needed</p>
+    <div class="themes" role="group" aria-label="Recolour this page">
+      <button class="sw" data-theme="" title="Monochrome"
+              style="background:linear-gradient(135deg,#f4f4f4,#555)"></button>
+      <button class="sw" data-theme="nebula" title="Nebula"
+              style="background:linear-gradient(135deg,#9d8cff,#161033)"></button>
+      <button class="sw" data-theme="aurora" title="Aurora"
+              style="background:linear-gradient(135deg,#6ef2c0,#07231f)"></button>
+      <button class="sw" data-theme="ember" title="Ember"
+              style="background:linear-gradient(135deg,#ff9a4d,#2a1410)"></button>
+      <button class="sw" data-theme="bloom" title="Bloom"
+              style="background:linear-gradient(135deg,#ff5fa2,#2a0f22)"></button>
+    </div>
+    <p class="meta" style="margin-top:8px">Four of the app's 26 themes. The real
+      ones animate the background too.</p>
+  </div>
+
+  <div class="stats rise">
+    <div class="stat"><div class="n" data-count="4">0</div>
+      <div class="l">mod sites, one search box</div></div>
+    <div class="stat"><div class="n" data-count="8">0</div>
+      <div class="l">Minecraft launchers read</div></div>
+    <div class="stat"><div class="n" data-count="141">0</div>
+      <div class="l">retro systems recognised</div></div>
+    <div class="stat"><div class="n" data-count="26">0</div>
+      <div class="l">themes, 6 animated</div></div>
+  </div>
+
+  <section id="features">
+    <h2 class="rise">Everything it does</h2>
+    <p class="lead rise">Every item here is a feature that exists in the build
+      on this page. Nothing on this list is planned, coming soon, or a
+      mock-up.</p>
+
+    <div class="grid">
+      <div class="card rise">
+        <span class="tag">Mods</span>
+        <h3>Four mod sites, one search box</h3>
+        <p>Thunderstore, Modrinth, GameBanana and the Steam Workshop, searched
+          together and interleaved so one site's catalogue does not bury the
+          other's.</p>
+        <ul>
+          <li>Tick several mods, install them in one go</li>
+          <li>Checks each build against your loader before downloading</li>
+          <li>Turn a mod off without deleting it</li>
+          <li>Share a mod list with friends; their copy fetches the files</li>
+          <li>Brings Workshop items into games that do not read that folder</li>
+        </ul>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Minecraft</span>
+        <h3>Whatever launcher you already use</h3>
+        <p>Reads the official launcher, Prism, MultiMC, the Modrinth app,
+          CurseForge, ATLauncher, GDLauncher and XMCL, wherever they already
+          are. Nothing extra to install.</p>
+        <ul>
+          <li>Mods, shaders, resource packs and data packs</li>
+          <li>A brand new instance with no mods at all</li>
+          <li>Export a <code>.mrpack</code> to send someone</li>
+          <li>See what is installed, per instance, and toggle it</li>
+          <li>Server list with live pings; recommendations for your pack</li>
+        </ul>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Minecraft</span>
+        <h3>Your skin, in 3D</h3>
+        <p>A real model you turn with the mouse, drawn without any 3D library
+          so it works offline. Look up any player's skin by name, which needs
+          no account at all, and wear one if you sign in.</p>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Retro</span>
+        <h3>RetroArch and RetroAchievements</h3>
+        <p>Finds RetroArch by itself and identifies your ROMs by hash against
+          141 systems. No key, no account, and it works offline after the
+          first lookup.</p>
+        <ul>
+          <li>What you are playing, its platform and its player count</li>
+          <li>Cheats, from RetroArch's folder or libretro's 28,000 files</li>
+          <li>Your achievement progress, using the login RetroArch stores</li>
+          <li>A shelf of box art for everything it recognised</li>
+        </ul>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Achievements</span>
+        <h3>Your collection, and what is close</h3>
+        <p>Everything you have earned across your library, sorted by how near
+          you are to finishing it.</p>
+        <ul>
+          <li>Rarest achievements, and rarity for the game you are in</li>
+          <li>Nearly there, and the graveyard of what you abandoned</li>
+          <li>Per-game completion and a running total</li>
+        </ul>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Friends</span>
+        <h3>Friends, with no company in the middle</h3>
+        <p>Profiles, direct messages, calls and screen sharing between your own
+          installs. The server is one small file you can run yourself.</p>
+        <ul>
+          <li>Profile with what you are playing and its art</li>
+          <li>Groups, challenges and a leaderboard</li>
+          <li>Join by a link, not an account on someone's platform</li>
+        </ul>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Assistant</span>
+        <h3>An assistant that can see the game</h3>
+        <p>Ask about the game you are in. It can read the screen when you ask
+          it to, keep notes between sessions, and coach you through a run.</p>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Toolkit</span>
+        <h3>The small things, in the same window</h3>
+        <ul>
+          <li>Custom crosshair overlay</li>
+          <li>Screenshots, with a gallery</li>
+          <li>Notes that stay with the game</li>
+          <li>Audio mixer and media controls</li>
+          <li>Calculator, colour picker, randomizer</li>
+          <li>Session timers and input statistics</li>
+        </ul>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">Look</span>
+        <h3>26 themes, six of them alive</h3>
+        <p>Nebula, Aurora, Ember and the rest animate the background behind the
+          interface. All of it stops when the window is not in front, so it
+          costs nothing while you are in a game.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="look">
+    <h2 class="rise">What it looks like</h2>
+    <p class="lead rise">Screenshots of the running app, not mock-ups. Click
+      one to see it full size.</p>
+    <div class="gal rise" id="gal" hidden>
+      <div class="galstage" id="galStage">
+        <button class="galzoom" id="galZoom" type="button">Full size</button>
+        <div class="galcap"><b id="galTitle"></b><span id="galBlurb"></span></div>
+      </div>
+      <div class="galstrip" id="galStrip" role="tablist"></div>
+    </div>
+  </section>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"
+       aria-label="Screenshot, full size">
+    <div class="lbbar">
+      <button type="button" id="lbPrev">&larr; Previous</button>
+      <span id="lbWhich"></span>
+      <button type="button" id="lbNext">Next &rarr;</button>
+      <button type="button" id="lbClose">Close</button>
+    </div>
+    <img id="lbImg" alt="">
+  </div>
+
+  <section id="honest">
+    <h2 class="rise">Before you install</h2>
+    <p class="lead rise">The awkward parts, up front rather than afterwards.</p>
+    <div class="rows rise">
+      <div class="row"><b>Windows only</b>
+        <span>Windows 10 and 11. There is no macOS or Linux build.</span></div>
+      <div class="row"><b>Not code-signed</b>
+        <span>SmartScreen will warn you the first time, as it does for any
+          installer without a paid certificate. The SHA-256 below lets you
+          check the file instead.</span></div>
+      <div class="row"><b>No account to use it</b>
+        <span>Mods, Minecraft, retro, achievements and the toolkit all work
+          with nothing signed in. An account is only for friends and
+          messages.</span></div>
+      <div class="row"><b>Some features use logins you already have</b>
+        <span>A Minecraft skin change needs a Microsoft sign-in. Retro
+          progress reads the RetroAchievements login RetroArch stores, and
+          only after you switch that on.</span></div>
+      <div class="row"><b>The assistant needs a key, or a local model</b>
+        <span>Chat and the screen assistant use whichever provider you
+          configure. Leave it alone and the rest of the app is unaffected.</span></div>
+      <div class="row"><b>Nothing is uploaded</b>
+        <span>Library, screenshots, notes and statistics stay on your PC. Mod
+          downloads come straight from the mod sites.</span></div>
+      <div class="row"><b>Uninstalls cleanly</b>
+        <span>Per-user install, an ordinary Add / Remove Programs entry, and
+          your settings survive updates.</span></div>
+    </div>
+  </section>
+
+  <section id="download">
+    <h2 class="rise">Download</h2>
+    <p class="lead rise">One file. Open it, click Install, and it launches.</p>
+    <div class="cta rise" style="justify-content:flex-start">
+      <a class="btn" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe">NyxenSetup.exe &middot; 29.5 MB</a>
+      <a class="btn ghost" href="sha256.txt">Checksum</a>
+    </div>
+    <p class="meta">SHA-256 <code>712a478cc681c4543a96082a78d9dd90de43a6afb8be8b7b0b784a455072f06a</code><br>
+      Check it with <code>certutil -hashfile NyxenSetup.exe SHA256</code> —
+      built into Windows, nothing to install.</p>
+    <div class="note rise" style="margin-top:22px">
+      <b>SmartScreen will warn you.</b> It does that for any installer without
+      a paid signing certificate, whatever the installer does. To continue:
+      <b>More info</b> → <b>Run anyway</b>. If you would rather not, the
+      SHA-256 above tells you the file has not been altered on the way to you.
+    </div>
+  </section>
+
+  <footer>
+    <span class="mark" style="width:26px;height:26px;border-radius:8px">
+      <img src="logo.svg" alt="" width="26" height="26"></span>
+    <span>Nyxen 1.0.0 — made by Antonio</span>
+    <a href="terms.html">Terms</a>
+    <a href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe">Download</a>
+    <span class="right">Not affiliated with Valve, Mojang, Microsoft, Modrinth,
+      Thunderstore, GameBanana, RetroAchievements or libretro.</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- header condenses once you leave the top ---- */
+  var head = document.getElementById("top");
+  function onScroll(){ head.classList.toggle("stuck", scrollY > 12); }
+  addEventListener("scroll", onScroll, {passive:true}); onScroll();
+
+  /* ---- scroll reveal. One observer, and it unobserves as it goes so the
+          page is not still watching forty elements at the bottom. ---- */
+  var rise = [].slice.call(document.querySelectorAll(".rise"));
+  if(!("IntersectionObserver" in window) || reduce){
+    rise.forEach(function(el){ el.classList.add("in"); });
+  }else{
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(!e.isIntersecting) return;
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+        if(e.target.classList.contains("stats")) countUp();
+      });
+    }, {rootMargin:"0px 0px -8% 0px"});
+    rise.forEach(function(el){ io.observe(el); });
+  }
+
+  /* ---- the numbers count once, when they appear ---- */
+  var counted = false;
+  function countUp(){
+    if(counted) return; counted = true;
+    [].forEach.call(document.querySelectorAll("[data-count]"), function(el){
+      var target = parseInt(el.getAttribute("data-count"), 10) || 0;
+      if(reduce){ el.textContent = target; return; }
+      var t0 = performance.now(), dur = 900;
+      (function step(now){
+        var k = Math.min(1, (now - t0) / dur);
+        // ease-out, so it decelerates into the real figure instead of
+        // stopping dead on it
+        el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+        if(k < 1) requestAnimationFrame(step);
+      })(performance.now());
+    });
+  }
+
+  /* ---- theme picker. Remembers your choice; the swatches are the app's
+          actual Eclipse palettes. ---- */
+  var swatches = [].slice.call(document.querySelectorAll(".sw"));
+  function applyTheme(name){
+    if(name) document.body.setAttribute("data-theme", name);
+    else document.body.removeAttribute("data-theme");
+    swatches.forEach(function(b){
+      b.setAttribute("aria-pressed", String(b.dataset.theme === name));
+    });
+    try{ localStorage.setItem("nyxen.site.theme", name); }catch(e){}
+    skyColour();
+  }
+  swatches.forEach(function(b){
+    b.addEventListener("click", function(){ applyTheme(b.dataset.theme); });
+  });
+  var saved = "";
+  try{ saved = localStorage.getItem("nyxen.site.theme") || ""; }catch(e){}
+  applyTheme(saved);
+
+  /* ---- the backdrop ----
+     Drifting points, recoloured from the theme's accent. Capped at 30fps
+     because nothing here needs 60, paused when the tab is hidden, and not
+     created at all under reduced motion. */
+  var cv = document.getElementById("sky");
+  if(reduce || !cv){ if(cv) cv.remove(); return; }
+  var ctx = cv.getContext("2d"), pts = [], w = 0, h = 0, dpr = 1, tint = "255,255,255";
+
+  function skyColour(){
+    var a = getComputedStyle(document.body).getPropertyValue("--accent").trim();
+    var probe = document.createElement("span");
+    probe.style.color = a; document.body.appendChild(probe);
+    var m = /rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(getComputedStyle(probe).color);
+    probe.remove();
+    if(m) tint = m[1] + "," + m[2] + "," + m[3];
+  }
+
+  function size(){
+    dpr = Math.min(2, devicePixelRatio || 1);
+    w = innerWidth; h = innerHeight;
+    cv.width = Math.floor(w * dpr); cv.height = Math.floor(h * dpr);
+    cv.style.width = w + "px"; cv.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Point count from area, so a phone does not draw a desktop's worth.
+    var want = Math.round(Math.min(150, (w * h) / 12000));
+    pts = [];
+    for(var i = 0; i < want; i++){
+      pts.push({x:Math.random()*w, y:Math.random()*h,
+                r:Math.random()*1.5+0.35,
+                vx:(Math.random()-0.5)*0.10, vy:(Math.random()-0.5)*0.10,
+                a:Math.random()*0.5+0.16,
+                tw:Math.random()*Math.PI*2});
+    }
+  }
+
+  var last = 0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(document.hidden) return;              // nothing to draw for nobody
+    if(now - last < 33) return;              // ~30fps
+    last = now;
+    ctx.clearRect(0, 0, w, h);
+    for(var i = 0; i < pts.length; i++){
+      var p = pts[i];
+      p.x += p.vx; p.y += p.vy; p.tw += 0.012;
+      if(p.x < -5) p.x = w + 5; else if(p.x > w + 5) p.x = -5;
+      if(p.y < -5) p.y = h + 5; else if(p.y > h + 5) p.y = -5;
+      var alpha = p.a * (0.72 + 0.28 * Math.sin(p.tw));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+      ctx.fillStyle = "rgba(" + tint + "," + alpha.toFixed(3) + ")";
+      ctx.fill();
+    }
+  }
+
+  skyColour();
+  size();
+  addEventListener("resize", size);
+  requestAnimationFrame(frame);
+})();
+
+/* ---- the screenshot gallery ----
+   The list comes from the server, which reads the folder. Adding a shot is
+   dropping a PNG in and redeploying; nothing here needs changing, and the
+   page cannot claim a screenshot that is not there. */
+(function(){
+  "use strict";
+  var shots = [], at = 0, imgs = [];
+
+  function show(i){
+    if(!shots.length) return;
+    at = (i + shots.length) % shots.length;
+    imgs.forEach(function(im, n){ im.classList.toggle("on", n === at); });
+    document.getElementById("galTitle").textContent = shots[at].title;
+    document.getElementById("galBlurb").textContent = shots[at].blurb || "";
+    [].forEach.call(document.querySelectorAll(".galthumb"), function(b, n){
+      b.setAttribute("aria-current", String(n === at));
+    });
+    var lb = document.getElementById("lightbox");
+    if(lb.classList.contains("on")) paint();
+  }
+
+  function paint(){
+    document.getElementById("lbImg").src = shots[at].file;
+    document.getElementById("lbImg").alt = shots[at].title;
+    document.getElementById("lbWhich").textContent =
+      shots[at].title + " — " + (at + 1) + " of " + shots.length;
+  }
+
+  function openLb(){
+    if(!shots.length) return;
+    paint();
+    document.getElementById("lightbox").classList.add("on");
+    // Stop the page behind from scrolling while the overlay is up.
+    document.body.style.overflow = "hidden";
+  }
+  function closeLb(){
+    document.getElementById("lightbox").classList.remove("on");
+    document.body.style.overflow = "";
+  }
+
+  fetch("shots.json").then(function(r){ return r.json(); }).then(function(d){
+    shots = (d && d.shots) || [];
+    if(!shots.length) return;            // no shots, no empty section
+    var gal = document.getElementById("gal");
+    var stage = document.getElementById("galStage");
+    var strip = document.getElementById("galStrip");
+    gal.hidden = false;
+
+    shots.forEach(function(s, i){
+      var im = document.createElement("img");
+      // Not lazy, any of them. This is a fixed set of a dozen images and the
+      // app window is often not visible - and a lazy image does not load
+      // while the page is hidden, which left the one on screen blank.
+      im.src = s.file;
+      im.alt = s.title;
+      // Appended in order, not inserted at the front: reversing the DOM and
+      // then reversing the array to compensate had them out of step, so the
+      // caption said "Home" over the last screenshot.
+      stage.appendChild(im);
+      imgs.push(im);
+
+      var b = document.createElement("button");
+      b.className = "galthumb";
+      b.type = "button";
+      b.innerHTML = '<img src="' + s.file + '" alt="" loading="lazy">'
+                  + '<div class="tn"></div>';
+      b.querySelector(".tn").textContent = s.title;
+      b.addEventListener("click", function(){ show(i); });
+      strip.appendChild(b);
+    });
+    show(0);
+
+    document.getElementById("galZoom").addEventListener("click", openLb);
+    stage.addEventListener("click", function(e){
+      if(e.target.tagName === "IMG") openLb();
+    });
+    document.getElementById("lbClose").addEventListener("click", closeLb);
+    document.getElementById("lbPrev").addEventListener("click", function(){ show(at - 1); });
+    document.getElementById("lbNext").addEventListener("click", function(){ show(at + 1); });
+    document.getElementById("lightbox").addEventListener("click", function(e){
+      if(e.target.id === "lightbox") closeLb();
+    });
+    addEventListener("keydown", function(e){
+      var open = document.getElementById("lightbox").classList.contains("on");
+      if(e.key === "Escape" && open) closeLb();
+      else if(e.key === "ArrowRight") show(at + 1);
+      else if(e.key === "ArrowLeft") show(at - 1);
+    });
+  }).catch(function(){ /* no gallery rather than a broken one */ });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+{
+ "shots": [
+  {
+   "file": "shots/home.png",
+   "title": "Home",
+   "blurb": "What you are playing, and what is waiting for you."
+  },
+  {
+   "file": "shots/library.png",
+   "title": "Library",
+   "blurb": "Every game Steam has installed, and the mods you run with them."
+  },
+  {
+   "file": "shots/mods.png",
+   "title": "Mods",
+   "blurb": "Four mod sites searched together."
+  },
+  {
+   "file": "shots/minecraft.png",
+   "title": "Minecraft",
+   "blurb": "Whatever launcher you already use."
+  },
+  {
+   "file": "shots/retro.png",
+   "title": "Retro",
+   "blurb": "RetroArch, your ROMs, and their achievements."
+  },
+  {
+   "file": "shots/achievements.png",
+   "title": "Achievements",
+   "blurb": "Everything you have earned, and what is left."
+  },
+  {
+   "file": "shots/statistics.png",
+   "title": "Statistics",
+   "blurb": "How you actually play, over time."
+  },
+  {
+   "file": "shots/ai.png",
+   "title": "Assistant",
+   "blurb": "Ask about the game in front of you."
+  },
+  {
+   "file": "shots/guides.png",
+   "title": "Guides",
+   "blurb": "Videos and walkthroughs for the game you loaded."
+  },
+  {
+   "file": "shots/social.png",
+   "title": "Social",
+   "blurb": "Friends, rooms, and your profile."
+  },
+  {
+   "file": "shots/messages.png",
+   "title": "Messages",
+   "blurb": "Direct messages, with calls in every conversation."
+  }
+ ]
+}

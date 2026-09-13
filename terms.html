@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms and privacy — Nyxen</title>
+<meta name="description" content="The terms for using Nyxen, and what it does and does not do with your data. Written in plain language.">
+<meta name="theme-color" content="#0b0b0b">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<style>
+  :root{
+    --bg1:#141414; --bg2:#070707; --fg:#f4f4f4; --dim:#9a9a9a; --dimmer:#6a6a6a;
+    --line:rgba(255,255,255,.10); --panel:rgba(255,255,255,.035);
+    --panel2:rgba(255,255,255,.06); --accent:#f4f4f4; --accent-fg:#0a0a0a;
+    --glow:rgba(255,255,255,.35); --r:16px; --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;color:var(--fg);
+    background:radial-gradient(80% 50% at 50% -10%,rgba(255,255,255,.05),transparent 60%),
+      linear-gradient(180deg,var(--bg1),var(--bg2) 55%);
+    font:16px/1.7 system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;min-height:100vh}
+  a{color:inherit}
+  .wrap{max-width:800px;margin:0 auto;padding:0 22px}
+  header{display:flex;align-items:center;gap:12px;padding:18px 0;
+    border-bottom:1px solid var(--line);margin-bottom:8px}
+  .mark{width:32px;height:32px;border-radius:9px;background:#0a0a0a;flex:none;
+    overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+  .mark img{width:100%;height:100%;display:block}
+  a.brand{display:flex;align-items:center;gap:11px;text-decoration:none;
+    font-weight:800;letter-spacing:-.02em}
+  header nav{margin-left:auto;display:flex;gap:16px;font-size:14px;color:var(--dim)}
+  header nav a{text-decoration:none}
+  header nav a:hover{color:var(--fg)}
+
+  h1{font-size:clamp(28px,5vw,42px);letter-spacing:-.03em;margin:30px 0 6px}
+  .updated{color:var(--dimmer);font-size:13.5px;margin:0 0 26px}
+  h2{font-size:19px;letter-spacing:-.01em;margin:34px 0 8px;
+    padding-top:22px;border-top:1px solid var(--line)}
+  h2:first-of-type{border-top:none;padding-top:0}
+  p,li{color:var(--dim);font-size:15.5px}
+  p{margin:0 0 12px}
+  strong{color:var(--fg);font-weight:600}
+  ul{margin:0 0 12px;padding-left:20px}
+  li{margin:5px 0}
+  .box{border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:10px;padding:16px 18px;background:var(--panel);margin:16px 0}
+  .box p:last-child{margin:0}
+  .toc{border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;
+    background:var(--panel);margin:0 0 30px}
+  .toc ol{margin:0;padding-left:20px}
+  .toc a{text-decoration:none;font-size:14.5px;color:var(--dim)}
+  .toc a:hover{color:var(--fg)}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;
+    background:var(--panel2);padding:2px 6px;border-radius:5px}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding:24px 0 44px;
+    color:var(--dimmer);font-size:13.5px;display:flex;gap:16px;flex-wrap:wrap}
+  footer a{text-decoration:none}
+  footer a:hover{color:var(--fg)}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <a class="brand" href="index.html">
+    <span class="mark"><img src="logo.svg" alt="" width="32" height="32"></span>
+    Nyxen
+  </a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe">Download</a>
+  </nav>
+</header>
+
+<h1>Terms and privacy</h1>
+<p class="updated">Last updated 13 September 2026 &middot; applies to Nyxen 1.0.0</p>
+
+<div class="box">
+  <p><strong>The short version.</strong> Nyxen is free and made by one person.
+  It runs on your PC and keeps your things on your PC. It comes with no
+  warranty. You are responsible for how you use it, including whether what you
+  do with it is allowed by the games and services you point it at. If you do
+  not agree with that, do not install it.</p>
+</div>
+
+<div class="toc">
+  <ol>
+    <li><a href="#what">What Nyxen is</a></li>
+    <li><a href="#use">Using it</a></li>
+    <li><a href="#achievements">Achievements and the unlocker</a></li>
+    <li><a href="#mods">Mods and other people's files</a></li>
+    <li><a href="#third">Other services</a></li>
+    <li><a href="#data">Your data</a></li>
+    <li><a href="#social">Friends, messages and the server</a></li>
+    <li><a href="#ai">The assistant</a></li>
+    <li><a href="#warranty">No warranty</a></li>
+    <li><a href="#changes">Changes and ending</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</div>
+
+<h2 id="what">1. What Nyxen is</h2>
+<p>Nyxen is a Windows application that sits alongside games you already own.
+It finds and installs mods, reads your Minecraft launchers, tracks
+achievements, talks to RetroArch, and can connect you to friends running the
+same app.</p>
+<p>It is free. There is nothing to buy inside it, no subscription and no
+advertising. It is made and maintained by one person as a personal project,
+not by a company.</p>
+<p><strong>It is not affiliated with</strong> Valve, Steam, Mojang, Microsoft,
+Modrinth, Thunderstore, GameBanana, CurseForge, Prism Launcher,
+RetroAchievements, libretro or any game publisher. Their names appear here and
+in the app only to say what it works with.</p>
+
+<h2 id="use">2. Using it</h2>
+<p>You may install and use Nyxen on computers you control, for as long as you
+like. You may not sell it, or pass off a modified copy as the original.</p>
+<p>You must not use it to break into accounts that are not yours, to
+distribute malware, or to do anything unlawful. If you do, these terms stop
+applying to you and you are on your own.</p>
+
+<h2 id="achievements">3. Achievements and the unlocker</h2>
+<p>Nyxen can mark Steam achievements as unlocked on <strong>your own
+account, for games you own</strong>. That is what the feature is for, and the
+app will not operate on anyone else's account.</p>
+<p>Be clear about what that means:</p>
+<ul>
+  <li>Some games, and some platforms, consider this against their rules.
+    Whether you are willing to accept that is your decision, not the app's.</li>
+  <li>It can affect leaderboards, other players' perception of your profile,
+    and in some cases your standing with a platform or game.</li>
+  <li><strong>It cannot be undone by Nyxen for every game</strong> — some
+    games and services keep their own copy of what you have earned.</li>
+</ul>
+<p>The app asks for confirmation before it changes anything, and it refuses
+cases it considers unsafe. Those checks exist to stop accidents, not to make
+the choice for you. <strong>The consequences are yours.</strong></p>
+
+<h2 id="mods">4. Mods and other people's files</h2>
+<p>Mods are made by other people and downloaded from their sites. Nyxen finds
+them and puts the files in the right folder; it does not host, review, scan or
+vouch for them.</p>
+<ul>
+  <li>Each mod has its own author, licence and terms. Those apply, not these.</li>
+  <li>A mod is code that runs inside your game. Install things you are
+    willing to trust.</li>
+  <li>Mods can break a game, a save file or a world. Back up anything you
+    care about. Nyxen never deletes a mod to install another one, but it
+    cannot make a broken combination work.</li>
+</ul>
+
+<h2 id="third">5. Other services</h2>
+<p>Some features talk to services run by other people. When you use those
+parts, their terms and privacy policies apply as well as these:</p>
+<ul>
+  <li><strong>Steam</strong> — for your library, achievements and the Workshop.</li>
+  <li><strong>Modrinth, Thunderstore, GameBanana</strong> — for mods, shaders
+    and packs.</li>
+  <li><strong>Microsoft and Mojang</strong> — if you sign in for Minecraft
+    skins. Nyxen never sees your password; sign-in happens on Microsoft's own
+    page.</li>
+  <li><strong>RetroAchievements</strong> — for retro achievement data.</li>
+  <li><strong>libretro</strong> — for the retro databases, cheats and box art.</li>
+  <li><strong>Your AI provider</strong> — only if you set one up.</li>
+</ul>
+<p>If one of them changes or goes away, the part of Nyxen that used it stops
+working. That is outside anyone's control here.</p>
+
+<h2 id="data">6. Your data</h2>
+<p>Nyxen is a desktop app, so almost everything stays on your machine:</p>
+<ul>
+  <li>Your library, playtime, achievement history, statistics, notes,
+    screenshots and settings are stored in your own user folder.</li>
+  <li><strong>None of it is sent anywhere</strong> unless a feature you used
+    needs to — a mod download, a game lookup, an achievement check.</li>
+  <li>There is <strong>no analytics, no telemetry and no crash reporting</strong>.
+    Nobody is counting how many people installed this or what they did with it.</li>
+  <li>Credentials you give it — an AI key, a Microsoft sign-in — are stored on
+    your PC, encrypted with Windows' own protection tied to your account.</li>
+  <li>Uninstalling leaves your data in place on purpose, so an update does not
+    wipe it. Delete the folder yourself if you want it gone.</li>
+</ul>
+
+<h2 id="social">7. Friends, messages and the server</h2>
+<p>The social side needs a server, because two PCs have to meet somewhere.
+There are two ways that happens, and they are different in a way worth
+understanding:</p>
+<ul>
+  <li><strong>You run it yourself.</strong> The server is one file. Your
+    accounts and messages live on your own machine and nobody else can read
+    them.</li>
+  <li><strong>You join someone else's</strong> — including the one this site
+    belongs to. Then what you post, send and set is stored on that server, and
+    whoever runs it can technically read it.</li>
+</ul>
+<p>So: <strong>do not treat messages as private or encrypted.</strong> They are
+not end-to-end encrypted. Treat them the way you would treat a message on any
+small forum.</p>
+<p>Calls and screen sharing connect the two computers directly where they can.
+When they cannot, the connection may be relayed by a third party.
+<strong>Share your screen deliberately</strong> — it shows whatever is on it.</p>
+<p>If you use a server someone else runs, they may remove accounts or content,
+and they are under no obligation to keep it running or to keep backups.</p>
+
+<h2 id="ai">8. The assistant</h2>
+<p>The assistant is optional and off until you configure a provider. When you
+use it:</p>
+<ul>
+  <li>What you type, and any screenshot you explicitly ask it to look at, is
+    sent to the provider you chose. Their terms apply to that.</li>
+  <li>It only reads the screen when you ask. It does not watch in the
+    background.</li>
+  <li><strong>It can be wrong.</strong> Advice about a game, a build or a
+    setting is a suggestion, not a fact. Do not follow it into anything
+    destructive without checking.</li>
+</ul>
+
+<h2 id="warranty">9. No warranty</h2>
+<p>Nyxen is provided <strong>as is</strong>, with no warranty of any kind,
+express or implied — including fitness for a particular purpose and
+non-infringement.</p>
+<p>To the fullest extent the law allows, the author is not liable for any
+damage, data loss, lost saves, broken game installs, account penalties or
+anything else arising from using this software. You install and run it at your
+own risk.</p>
+<p>Nothing here tries to remove rights you have under the consumer law where
+you live, because it cannot.</p>
+
+<h2 id="changes">10. Changes and ending</h2>
+<p>These terms can change when the app changes. The date at the top says when
+they last did. Continuing to use the app after a change means you accept it;
+if you do not, uninstall it.</p>
+<p>The app may stop being updated at any point. It is a personal project, and
+nobody is promising a roadmap, a support window or an uptime figure for any
+server.</p>
+<p>You can stop at any time: uninstall it from Add / Remove Programs.</p>
+
+<h2 id="contact">11. Contact</h2>
+<p>Nyxen is made by Antonio. For a problem with the app, a bug, or a request
+to remove something from a server run by this site, get in touch through
+whichever channel you were given the app.</p>
+<p>There is no support desk and no guaranteed reply. That is the honest
+position for a free project made by one person.</p>
+
+<footer>
+  <span>Nyxen 1.0.0</span>
+  <a href="index.html">Home</a>
+  <a href="https://github.com/Kerioxsx/nyxen/releases/download/v1.0.0/NyxenSetup.exe">Download</a>
+  <a href="sha256.txt">Checksum</a>
+</footer>
+
+</div>
+</body>
+</html>
