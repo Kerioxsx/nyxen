@@ -68,7 +68,12 @@
   {
    "file": "shots/themes.png",
    "title": "Themes",
-   "blurb": "52 themes, 16 of them animated, and six interface styles. This one is Synthwave."
+   "blurb": "52 themes, 16 of them animated. This one is Synthwave."
+  },
+  {
+   "file": "shots/layouts.png",
+   "title": "Layouts",
+   "blurb": "Seven interface styles that move the navigation itself - sidebar, rail, top bar, floating glass or a dock like this one."
   }
  ]
 }
