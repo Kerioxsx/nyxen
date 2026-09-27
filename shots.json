@@ -23,7 +23,7 @@
   {
    "file": "shots/livemap.png",
    "title": "Minecraft live map",
-   "blurb": "Your map, your coordinates and the players around you - while you play."
+   "blurb": "Full screen while you play: the map, who is near, your call, the room's music, the time and your hotbar."
   },
   {
    "file": "shots/retro.png",
@@ -47,13 +47,18 @@
   },
   {
    "file": "shots/social.png",
-   "title": "Social",
-   "blurb": "Rooms with voice, chat, music and game nights."
+   "title": "Rooms",
+   "blurb": "Voice, chat, music anyone can DJ, game nights and modpacks - in one place."
+  },
+  {
+   "file": "shots/profile.png",
+   "title": "Profiles",
+   "blurb": "What your friends are playing and listening to - Roblox and Minecraft included, Spotify and Apple Music too."
   },
   {
    "file": "shots/messages.png",
    "title": "Messages",
-   "blurb": "Direct messages, with calls in every conversation."
+   "blurb": "Replies, reactions, edits, typing and seen - with calls, screen share and music together."
   },
   {
    "file": "shots/eclipse.png",
@@ -63,7 +68,7 @@
   {
    "file": "shots/themes.png",
    "title": "Themes",
-   "blurb": "52 themes, 16 of them animated. This one is Synthwave."
+   "blurb": "52 themes, 16 of them animated, and six interface styles. This one is Synthwave."
   }
  ]
 }
