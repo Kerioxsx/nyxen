@@ -8,17 +8,22 @@
   {
    "file": "shots/library.png",
    "title": "Library",
-   "blurb": "Every game Steam has installed, and the mods you run with them."
+   "blurb": "Every game Steam has installed - click one and Steam starts it."
   },
   {
    "file": "shots/mods.png",
    "title": "Mods",
-   "blurb": "Four mod sites searched together."
+   "blurb": "Any installed game: Thunderstore, GameBanana, Nexus Mods and the Workshop, together."
   },
   {
    "file": "shots/minecraft.png",
    "title": "Minecraft",
    "blurb": "Whatever launcher you already use."
+  },
+  {
+   "file": "shots/livemap.png",
+   "title": "Minecraft live map",
+   "blurb": "Your map, your coordinates and the players around you - while you play."
   },
   {
    "file": "shots/retro.png",
@@ -28,12 +33,7 @@
   {
    "file": "shots/achievements.png",
    "title": "Achievements",
-   "blurb": "Everything you have earned, and what is left."
-  },
-  {
-   "file": "shots/statistics.png",
-   "title": "Statistics",
-   "blurb": "How you actually play, over time."
+   "blurb": "Everything you have earned, and your rarest unlocks."
   },
   {
    "file": "shots/ai.png",
@@ -48,12 +48,22 @@
   {
    "file": "shots/social.png",
    "title": "Social",
-   "blurb": "Friends, rooms, and your profile."
+   "blurb": "Rooms with voice, chat, music and game nights."
   },
   {
    "file": "shots/messages.png",
    "title": "Messages",
    "blurb": "Direct messages, with calls in every conversation."
+  },
+  {
+   "file": "shots/eclipse.png",
+   "title": "Nyxen Eclipse",
+   "blurb": "Twenty animated rings - or build your own - plus name effects and chat bubbles."
+  },
+  {
+   "file": "shots/themes.png",
+   "title": "Themes",
+   "blurb": "52 themes, 16 of them animated. This one is Synthwave."
   }
  ]
 }
