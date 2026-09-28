@@ -21,6 +21,11 @@
    "blurb": "Whatever launcher you already use."
   },
   {
+   "file": "shots/tray.png",
+   "title": "Nyxen in the tray",
+   "blurb": "Right-click the icon by the clock: the song playing, your status, the call, your games, a screenshot and Quit."
+  },
+  {
    "file": "shots/livemap.png",
    "title": "Minecraft in 3D blocks",
    "blurb": "The live map as real cubes from your save - one switch between 2D and 3D, friends, waypoints, your hotbar and the time of day."
