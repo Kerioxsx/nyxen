@@ -439,6 +439,60 @@
   .plan .terms i{font-style:normal;font-size:11px;opacity:.7}
   body.light .plan .terms a{border-color:rgba(0,0,0,.14)}
   .plan .trialnote{font-size:12px;opacity:.7;line-height:1.5;margin:10px 0 0}
+
+  /* ---- 1.10: the app in the hero, floating ------------------------- */
+  .stage{position:relative;margin:54px auto 10px;max-width:1000px;height:clamp(300px,52vw,560px);
+    perspective:1600px;animation:fadeUp 1s var(--ease) .9s both}
+  .stage .win{position:absolute;border-radius:14px;overflow:hidden;border:1px solid var(--line2);
+    background:var(--bg2);box-shadow:0 40px 90px -30px rgba(0,0,0,.85),0 0 0 1px rgba(var(--dot),.04);
+    transition:transform .6s var(--ease)}
+  .stage .win img{display:block;width:100%;height:auto}
+  .stage .win .bar{height:26px;display:flex;align-items:center;gap:6px;padding:0 11px;
+    background:color-mix(in srgb,var(--bg2) 85%,#fff 3%);border-bottom:1px solid var(--line)}
+  .stage .win .bar i{width:9px;height:9px;border-radius:50%;background:var(--line2)}
+  .stage .win .bar b{margin-left:8px;font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.02em}
+  .stage .w1{left:14%;right:14%;top:0;z-index:3;
+    transform:rotateX(calc(8deg + var(--py) * -3deg)) rotateY(calc(var(--px) * 4deg)) translateZ(0)}
+  .stage .w2{left:0;width:40%;top:34%;z-index:2;
+    transform:rotateY(18deg) rotateX(4deg) translate3d(calc(var(--px) * -12px),0,-120px)}
+  .stage .w3{right:0;width:40%;top:30%;z-index:2;
+    transform:rotateY(-18deg) rotateX(4deg) translate3d(calc(var(--px) * -12px),0,-120px)}
+  .stage::after{content:"";position:absolute;left:10%;right:10%;bottom:-30px;height:60px;z-index:0;
+    background:radial-gradient(closest-side,rgba(var(--dot),.12),transparent);filter:blur(10px)}
+  @media(max-width:760px){.stage .w2,.stage .w3{display:none}.stage .w1{left:0;right:0}}
+
+  .news{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:26px 0 0}
+  .news a{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel);text-decoration:none;font-size:13.5px;color:var(--dim);
+    transition:border-color .2s,color .2s,transform .2s var(--ease)}
+  .news a:hover{border-color:var(--line2);color:var(--fg);transform:translateY(-2px)}
+  .news a b{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:2px 7px;border-radius:6px;
+    background:var(--ink);color:var(--ink-fg)}
+
+  /* ---- spotlights: one big picture and the story beside it --------- */
+  .spot{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px;align-items:center;
+    padding:40px 0;border-top:1px solid var(--line)}
+  .spot:first-of-type{border-top:0}
+  .spot.flip{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}
+  .spot.flip .shotbox{order:2}
+  .shotbox{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line2);
+    box-shadow:0 36px 80px -34px rgba(0,0,0,.9);background:var(--bg2);cursor:zoom-in;
+    transition:transform .5s var(--ease),box-shadow .5s}
+  .shotbox:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 44px 90px -30px rgba(0,0,0,.95)}
+  .shotbox img{display:block;width:100%;height:auto}
+  .shotbox .pip{position:absolute;right:14px;bottom:14px;width:34%;border-radius:10px;overflow:hidden;
+    border:1px solid rgba(255,255,255,.35);box-shadow:0 20px 40px -14px rgba(0,0,0,.8)}
+  .shotbox .pip img{display:block;width:100%}
+  .spot h3{font-size:clamp(22px,3vw,30px);letter-spacing:-.03em;margin:8px 0 10px;line-height:1.1}
+  .spot p{color:var(--dim);margin:0 0 12px}
+  .spot ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px}
+  .spot li{padding-left:22px;position:relative;font-size:14.5px}
+  .spot li::before{content:"";position:absolute;left:0;top:.55em;width:10px;height:10px;border-radius:3px;
+    border:1px solid var(--line2);background:var(--panel2)}
+  .spot .kick{display:inline-block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    padding:3px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel2)}
+  .spot .kick.beta{background:var(--ink);color:var(--ink-fg);border-color:var(--ink)}
+  @media(max-width:860px){.spot,.spot.flip{grid-template-columns:1fr;gap:20px}.spot.flip .shotbox{order:0}}
 </style>
 <noscript><style>
   /* The reveals are driven by script: .rise gets .in from an observer, and
@@ -468,6 +522,7 @@
       <span class="bname">Nyxen</span>
     </a>
     <nav>
+      <a href="#new">New</a>
       <a href="#look">Screenshots</a>
       <a href="#features">Everything it does</a>
       <a href="#start">Getting started</a>
@@ -493,15 +548,27 @@
     <div class="bigmark"><img src="logo.svg" alt="Nyxen" width="112" height="112"></div>
     <h1><span class="shine" data-split>One place for your games.</span></h1>
     <p class="sub">Mods from four sites at once. Minecraft with whatever launcher
-      you already have. Retro achievements. Your friends. One Windows app that
-      needs no account to be useful.</p>
+      you already have - now in 3D blocks. Retro achievements. Your friends, and a 3D
+      Space to hang out in. One Windows app that needs no account to be useful.</p>
     <div class="cta">
-      <a class="btn magnet" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.9.1/NyxenSetup.exe"><span>Download for Windows</span>
+      <a class="btn magnet" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.10.0/NyxenSetup.exe"><span>Download for Windows</span>
         <span class="arw" aria-hidden="true">&rarr;</span></a>
       <a class="btn ghost magnet" href="#look"><span>See it first</span></a>
     </div>
-    <p class="meta">Version 1.9.1 &middot; 29.5 MB &middot; Windows 10 and 11
+    <p class="meta">Version 1.10.0 &middot; 40.6 MB &middot; Windows 10 and 11
       &middot; no administrator rights needed</p>
+    <div class="news">
+      <a href="#s-map"><b>New</b>Minecraft in 3D blocks</a>
+      <a href="#s-space"><b>Beta</b>Nyxen Space - a 3D room for friends</a>
+      <a href="#s-voice"><b>New</b>A voice that sounds human</a>
+      <a href="#s-social"><b>New</b>Songs with their covers, instantly</a>
+    </div>
+  </div>
+
+  <div class="stage" aria-hidden="true">
+    <div class="win w2"><div class="bar"><i></i><i></i><i></i><b>Minecraft live map</b></div><img src="shots/livemap.png" alt="" loading="lazy"></div>
+    <div class="win w3"><div class="bar"><i></i><i></i><i></i><b>Social</b></div><img src="shots/socialhome.png" alt="" loading="lazy"></div>
+    <div class="win w1"><div class="bar"><i></i><i></i><i></i><b>Nyxen Space</b></div><img src="shots/space.png" alt="Nyxen Space: chrome friends on a couch watching a shared screen"></div>
   </div>
 
   <div class="belt" aria-label="What it works with">
@@ -519,6 +586,87 @@
       <div class="l">themes, 16 animated</div></div>
   </div>
 
+  <section id="new">
+    <p class="eyebrow rise">New in 1.10.0</p>
+    <h2 class="rise">The biggest update yet</h2>
+    <p class="lead rise">Everything below is in the build on this page - click a picture to see it full size.</p>
+
+    <div class="spot rise" id="s-map">
+      <div class="shotbox" data-full="shots/livemap.png"><img src="shots/livemap.png" alt="A Minecraft world drawn in 3D blocks inside Nyxen" loading="lazy"></div>
+      <div>
+        <span class="kick">Minecraft</span>
+        <h3>Your world, in real 3D blocks</h3>
+        <p>Press <b>3D</b> on the live map and your world turns into cubes - read straight from the
+          save on your PC, with the trees, water, snow and the houses you built. Your friends walk
+          around on it and your waypoints glow as beacons.</p>
+        <ul>
+          <li><b>Textures</b> uses your own game's block pictures, <b>Clean</b> draws it like a model</li>
+          <li>Angled, from the top or close to the ground - drag to turn, scroll to zoom</li>
+          <li>Full screen with your hotbar, health, the call and the time of day</li>
+          <li><b>Explore a world in 3D</b> with the game closed - Overworld, Nether and End</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="spot flip rise" id="s-space">
+      <div class="shotbox" data-full="shots/space.png"><img src="shots/space.png" alt="Chrome figures sitting on a couch in a white 3D world, watching a shared screen on a TV" loading="lazy">
+        <div class="pip"><img src="shots/space_build.png" alt="Building with pastel blocks in Nyxen Space" loading="lazy"></div></div>
+      <div>
+        <span class="kick beta">Beta</span>
+        <h3>Nyxen Space: hang out in 3D</h3>
+        <p>A bright white world with a grid floor and a low sun, where you and your friends walk around
+          as puffy chrome figures with floating heads - in the chrome colour you pick.</p>
+        <ul>
+          <li>Talk: it is a real voice call, and people sound quieter the further away they stand</li>
+          <li>Sit on the couch and watch whoever shares their screen on the TV</li>
+          <li>Build together, Minecraft-style: blocks in any colour, glass, lights and furniture</li>
+          <li>What you build stays, chat bubbles over heads, waves and dances</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="spot rise" id="s-voice">
+      <div class="shotbox" data-full="shots/voice.png"><img src="shots/voice.png" alt="The natural voice download in Nyxen's settings" loading="lazy"></div>
+      <div>
+        <span class="kick">Assistant</span>
+        <h3>A voice that sounds like a person</h3>
+        <p>One click in Settings and the assistant stops sounding like a robot. The natural voice runs
+          entirely on your PC - no key, no account, nothing you say is sent anywhere.</p>
+        <ul>
+          <li>Ten voices: Heart, Bella, Nicole, Michael, Fenrir, Puck, Emma, George - and Spanish</li>
+          <li>Starts talking while it is still thinking of the next sentence</li>
+          <li>One download, about 120 MB, and it stays out of your game's way</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="spot flip rise" id="s-social">
+      <div class="shotbox" data-full="shots/socialhome.png"><img src="shots/socialhome.png" alt="Nyxen's Social home with friends online and what they are playing and listening to" loading="lazy"></div>
+      <div>
+        <span class="kick">Friends</span>
+        <h3>Social, with a real home</h3>
+        <p>See who is online, what they are playing and what they are listening to - with the song's
+          cover, straight from Spotify or Apple Music, the moment it changes.</p>
+        <ul>
+          <li>Your game and your song at the top, the feed below</li>
+          <li>Live rooms to jump into, and people you may know</li>
+          <li>Message or call anyone from the list in one click</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="spot rise" id="s-layouts">
+      <div class="shotbox" data-full="shots/layouts.png"><img src="shots/layouts.png" alt="Nyxen's Hub layout with friends and the song playing in a column on the right" loading="lazy"></div>
+      <div>
+        <span class="kick">Look</span>
+        <h3>Ten layouts, not just colours</h3>
+        <p>Interface styles move the navigation itself: a sidebar, a slim rail, a top bar, floating
+          glass, a Mac-style dock, Zen, Couch for the TV - or Hub, with your friends and your music in a
+          column beside everything.</p>
+      </div>
+    </div>
+  </section>
+
   <section id="features">
     <p class="eyebrow rise">What is in it</p>
     <h2 class="rise">Everything it does</h2>
@@ -527,6 +675,25 @@
       mock-up.</p>
 
     <div class="grid" id="cards">
+      <div class="card rise">
+        <span class="tag">New</span>
+        <h3>Nyxen Space (beta)</h3>
+        <p>A 3D room for friends: chrome figures, voice that fades with distance, a couch, a TV that
+          shows whoever shares their screen, and building together.</p>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">New</span>
+        <h3>Minecraft in 3D blocks</h3>
+        <p>The live map as real cubes, from your world's save - with your friends, waypoints and the
+          time of day. Works with the game closed too.</p>
+      </div>
+
+      <div class="card rise">
+        <span class="tag">New</span>
+        <h3>A natural voice</h3>
+        <p>The assistant speaks like a person, on your PC, with no key. Ten voices to pick from.</p>
+      </div>
       <div class="card rise">
         <span class="tag">Mods</span>
         <h3>Four mod sites, one search box</h3>
@@ -705,7 +872,7 @@
           <li>The Nyxen AI assistant</li>
           <li>52 themes, your own accent colour and font</li>
         </ul>
-        <a class="btn ghost" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.9.1/NyxenSetup.exe"><span>Download free</span></a>
+        <a class="btn ghost" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.10.0/NyxenSetup.exe"><span>Download free</span></a>
       </div>
       <div class="card plan best">
         <div class="pn">Nyxen Eclipse</div>
@@ -772,11 +939,11 @@
     <p class="eyebrow rise">Download</p>
     <h2 class="rise">One file. Open it, click Install, and it launches.</h2>
     <div class="cta rise" style="justify-content:flex-start">
-      <a class="btn magnet" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.9.1/NyxenSetup.exe"><span>NyxenSetup.exe &middot; 29.5 MB</span>
+      <a class="btn magnet" href="https://github.com/Kerioxsx/nyxen/releases/download/v1.10.0/NyxenSetup.exe"><span>NyxenSetup.exe &middot; 40.6 MB</span>
         <span class="arw" aria-hidden="true">&darr;</span></a>
       <a class="btn ghost magnet" href="sha256.txt"><span>Checksum</span></a>
     </div>
-    <p class="meta">SHA-256 <code>d1d5d7304cfe578b82d3ac1f164c149c4657415d8d7ead438427b7a9eed8b07b</code><br>
+    <p class="meta">SHA-256 <code>2ec69ac373b36f0b71ed348a45aef800371647f110d7905761b919fb27d04b2e</code><br>
       Check it with <code>certutil -hashfile NyxenSetup.exe SHA256</code> —
       built into Windows, nothing to install.</p>
     <div class="note rise" style="margin-top:22px">
@@ -790,9 +957,9 @@
   <footer>
     <span class="mark" style="width:26px;height:26px;border-radius:8px">
       <img src="logo.svg" alt="" width="26" height="26"></span>
-    <span>Nyxen 1.9.1 — made by Antonio</span>
+    <span>Nyxen 1.10.0 — made by Antonio</span>
     <a href="terms.html">Terms</a>
-    <a href="https://github.com/Kerioxsx/nyxen/releases/download/v1.9.1/NyxenSetup.exe">Download</a>
+    <a href="https://github.com/Kerioxsx/nyxen/releases/download/v1.10.0/NyxenSetup.exe">Download</a>
     <span class="right">Not affiliated with Valve, Mojang, Microsoft, Modrinth,
       Thunderstore, GameBanana, RetroAchievements or libretro.</span>
   </footer>
@@ -1211,6 +1378,15 @@ document.querySelectorAll("[data-checkout]").forEach(a => {
       strip.appendChild(b);
     });
     show(0);
+    // The spotlight pictures open the same full-size viewer, at that shot.
+    [].forEach.call(document.querySelectorAll(".shotbox[data-full]"), function(box){
+      box.addEventListener("click", function(){
+        var n = -1;
+        shots.forEach(function(s, k){ if(s.file === box.getAttribute("data-full")) n = k; });
+        if(n < 0) return;
+        show(n); openLb();
+      });
+    });
 
     // Looking at it, or reading the strip, stops it moving under you.
     stage.addEventListener("pointerenter", function(){ hold(true); });

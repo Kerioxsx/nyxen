@@ -22,8 +22,28 @@
   },
   {
    "file": "shots/livemap.png",
-   "title": "Minecraft live map",
-   "blurb": "Full screen while you play: the map, who is near, your call, the room's music, the time and your hotbar."
+   "title": "Minecraft in 3D blocks",
+   "blurb": "The live map as real cubes from your save - friends, waypoints, your hotbar and the time of day, full screen."
+  },
+  {
+   "file": "shots/space.png",
+   "title": "Nyxen Space (beta)",
+   "blurb": "A 3D room for friends: chrome figures, voice that fades with distance, the couch and a TV that shows shared screens."
+  },
+  {
+   "file": "shots/space_build.png",
+   "title": "Building together",
+   "blurb": "Blocks in any colour, glass, lights and furniture - and what you build stays."
+  },
+  {
+   "file": "shots/socialhome.png",
+   "title": "Social home",
+   "blurb": "Who is online, what they play and listen to - songs with their covers, straight from Spotify."
+  },
+  {
+   "file": "shots/voice.png",
+   "title": "A natural voice",
+   "blurb": "One download and the assistant sounds like a person - on your PC, no key."
   },
   {
    "file": "shots/retro.png",
