@@ -1,9 +1,9 @@
 {
- "version": "1.0 Early Access (build 15)",
- "build": 15,
+ "version": "1.0 Early Access (build 16)",
+ "build": 16,
  "display": "1.0 Early Access",
- "url": "https://github.com/Kerioxsx/nyxen/releases/download/v1.0-early-access.15/NyxenSetup.exe",
- "sha256": "00e32fd1c7e52f619eb3cb982a4572a910875556f17aee009f85bcc7f4b5fa30",
- "size": 42611821,
- "notes": "Nyxen 1.0 Early Access\n\nNyxen is in early access: everything works and new builds arrive through the\napp, but it is still growing. The version stays 1.0 Early Access while it does.\n\nNew figures in the Space: everyone is a chrome pictogram now - one smooth body\nwhere the arms and legs grow out of round shoulders, a round head floating just\nabove, gunmetal chrome with a white shine from above. Chrome, glossy, jelly,\ntwo-tone or oil-slick in any colour, and it still walks, sits, waves and dances.\n\nThe assistant's Speak button can be cancelled: while it listens it says Cancel -\nclick it again, or press Esc, and it stops at once without asking anything.\n\nAlso in this build: quick build (drag an area, pick a house, shop, office,\npark, parking or road), ready-made walls and pieces, an easier hotbar and tool\nrow, first person, full screen, a Dark / White button, and a green mic over\nwhoever is talking."
+ "url": "https://github.com/Kerioxsx/nyxen/releases/download/v1.0-early-access.16/NyxenSetup.exe",
+ "sha256": "8c34a290b14228b241b6385f6400e230159b809be4ca5a4e72feec50159fa053",
+ "size": 42621275,
+ "notes": "Nyxen 1.0 Early Access\n\nThe figures look like the chrome pictogram now: broad round shoulders, arms\nthat hang a little out from the sides, a straight body into two thick legs,\nand a round head floating just above - gunmetal chrome with a white shine.\nEveryone starts from it once; Look changes it any time, and \"Chrome, like the\npicture\" brings it back. The walk is calmer and the steps match your speed.\n\nNew in the Space: reactions (the column on the right, or 1-8) float a heart,\na laugh, fire and more over your head for everyone. A pet follows you - a cat,\na dog, a bunny, a duck, a little dragon or a glow orb (Look). Photo (P) saves\nwhat you see with your screenshots. Invite friends here, in Spaces, sends them\na card that brings them straight to you.\n\nLibrary: What should I play? picks one of your installed games - leaning\ntowards ones you nearly finished or have not touched in a while - to play,\nroll again, or invite friends to. Almost done and Never played filters, and\nplay times now come from Steam itself for every game.\n\nMessages: invites to play a Steam game arrive as a card with its art and a\nPlay button. The assistant's Speak button can be cancelled."
 }
