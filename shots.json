@@ -33,12 +33,27 @@
   {
    "file": "shots/space.png",
    "title": "Nyxen Space (beta)",
-   "blurb": "A 3D place for friends in Social: glossy buddies you dress up, DJ decks for music, chat bubbles, voice that fades with distance and screens for shared screens."
+   "blurb": "A 3D place for friends in Social: chrome figures you dress up, a mic over whoever talks, blue chat bubbles, DJ decks and screens for shared screens."
   },
   {
    "file": "shots/space_build.png",
-   "title": "Building together",
-   "blurb": "Like a city builder: walls and rooms in one drag, roads, lamps, cars and ready-made houses, shops and parks."
+   "title": "Quick build",
+   "blurb": "Drag an area and pick a house, shop, office tower, apartments, park, parking or road - this street took seven drags."
+  },
+  {
+   "file": "shots/space_zone.png",
+   "title": "The quick build menu",
+   "blurb": "It opens beside the area you dragged, and whatever you pick is built to fit it, facing you."
+  },
+  {
+   "file": "shots/space_first.png",
+   "title": "First person",
+   "blurb": "See the Space through your own eyes - one button, F5 or the mouse wheel."
+  },
+  {
+   "file": "shots/space_dark.png",
+   "title": "Dark or white",
+   "blurb": "One button flips the Space between a night sky and a bright grey one."
   },
   {
    "file": "shots/socialhome.png",
