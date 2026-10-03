@@ -79,12 +79,12 @@ jobs:
       - run: npm run build
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
-      - name: Tests (including live MFT and USN tests on C:)
+      - name: Tests (including live MFT and USN tests on the system drive)
         env:
           OMNIHUB_FAKE_SCREEN: '1'
         run: cargo test -p omnihub-core -- --nocapture
-      - name: Benchmark full MFT scan of C:
-        run: cargo run --release -p omnihub-core --example mftbench -- C:
+      - name: 'Benchmark: full MFT scan of drive C'
+        run: cargo run --release -p omnihub-core --example mftbench -- 'C:'
       - name: Build installer
         run: npx tauri build
       - uses: actions/upload-artifact@v4
